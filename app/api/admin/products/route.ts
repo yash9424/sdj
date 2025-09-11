@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const products = db.collection('products')
 
     const allProducts = await products.find({}, { 
-      projection: { name: 1, category: 1, price: 1, image: 1, description: 1, material: 1, inStock: 1, createdAt: 1 }
+      projection: { name: 1, category: 1, price: 1, mainPrice: 1, image: 1, mainImage: 1, images: 1, description: 1, material: 1, color: 1, style: 1, metalWeight: 1, purity: 1, stock: 1, features: 1, inStock: 1, createdAt: 1 }
     }).sort({ createdAt: -1 }).limit(1000).toArray()
     
     const formattedProducts = allProducts.map(product => ({
@@ -29,9 +29,18 @@ export async function GET(request: NextRequest) {
       name: product.name,
       category: product.category,
       price: product.price,
+      mainPrice: product.mainPrice,
       image: product.image,
+      mainImage: product.mainImage,
+      images: product.images,
       description: product.description,
       material: product.material,
+      color: product.color,
+      style: product.style,
+      metalWeight: product.metalWeight,
+      purity: product.purity,
+      stock: product.stock,
+      features: product.features,
       inStock: product.inStock || true,
       createdAt: product.createdAt || new Date().toISOString()
     }))
@@ -71,20 +80,21 @@ export async function POST(request: NextRequest) {
       style: formData.get('style') as string,
       metalWeight: formData.get('metalWeight') as string,
       purity: formData.get('purity') as string,
+      stock: parseInt(formData.get('stock') as string) || 0,
       features: [
         formData.get('feature1') as string,
         formData.get('feature2') as string,
         formData.get('feature3') as string,
         formData.get('feature4') as string
       ].filter(f => f),
-      mainImage: formData.get('mainImage') ? 'uploaded' : '',
+      mainImage: formData.get('mainImage') ? `/uploads/${Date.now()}_main.jpg` : '',
       images: [
-        formData.get('image1') ? 'uploaded' : '',
-        formData.get('image2') ? 'uploaded' : '',
-        formData.get('image3') ? 'uploaded' : '',
-        formData.get('image4') ? 'uploaded' : ''
+        formData.get('image1') ? `/uploads/${Date.now()}_1.jpg` : '',
+        formData.get('image2') ? `/uploads/${Date.now()}_2.jpg` : '',
+        formData.get('image3') ? `/uploads/${Date.now()}_3.jpg` : '',
+        formData.get('image4') ? `/uploads/${Date.now()}_4.jpg` : ''
       ].filter(img => img),
-      image: formData.get('mainImage') ? 'uploaded' : '',
+      image: formData.get('mainImage') ? `/uploads/${Date.now()}_main.jpg` : '',
       inStock: true,
       rating: 4.5,
       reviews: 0,
