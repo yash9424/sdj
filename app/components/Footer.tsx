@@ -89,7 +89,7 @@ export default function Footer() {
             <h4 className="text-lg font-bold mb-4 text-gray-800">Collections</h4>
             <div className="space-y-3">
               <Link href="/jewelry" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
-                → Combo
+                → Combo Set
               </Link>
               <Link href="/jewelry" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
                 → Necklace

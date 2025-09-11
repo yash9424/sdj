@@ -17,7 +17,7 @@ export default function NewArrival() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#A89F91]/80 via-[#A89F91]/20 to-transparent" />
             <div className="absolute bottom-6 left-6 text-[#FFFAF3]">
-              <h2 className="text-3xl font-serif italic mb-1">Combo</h2>
+              <h2 className="text-3xl font-serif italic mb-1">Combo Set</h2>
               <p className="text-sm opacity-90">Complete Jewelry Sets</p>
             </div>
           </div>

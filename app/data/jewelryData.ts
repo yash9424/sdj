@@ -25,7 +25,7 @@ export const jewelryCategories = [
   },
   {
     id: 2,
-    name: 'COMBO',
+    name: 'COMBO SET',
     slug: 'ring',
     image: 'https://tejaani.com/wp-content/uploads/2021/03/BRCJ7-1.jpg',
     description: 'Beautiful jewelry combo sets and collections',

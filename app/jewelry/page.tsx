@@ -83,7 +83,7 @@ export default function JewelryPage() {
                 : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-300'
             }`}
           >
-            Combo
+            COMBO SET
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}

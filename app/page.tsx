@@ -12,7 +12,7 @@ import NewArrival from './components/NewArrival'
 const categories = [
   {
     id: 1,
-    name: 'COMBO',
+    name: 'COMBO SET',
     image: '/ring1.webp'
   },
   {
