@@ -32,6 +32,7 @@ export default function JewelryPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
   const [showFilters, setShowFilters] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
   const [selectedType, setSelectedType] = useState('all')
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>(['all'])
   const [selectedColor, setSelectedColor] = useState('all')
@@ -181,10 +182,23 @@ export default function JewelryPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col lg:flex-row gap-6 lg:gap-8">
-        {/* Sidebar Filters */}
-        <div className="w-full lg:w-80 flex-shrink-0">
-          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-300 lg:sticky lg:top-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Mobile Filter Button */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className="w-full flex items-center justify-center space-x-2 bg-gray-800 text-white py-3 px-4 rounded-lg"
+          >
+            <Filter size={20} />
+            <span>Filters</span>
+            {showMobileFilters ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Sidebar Filters */}
+          <div className={`w-full lg:w-80 flex-shrink-0 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-300 lg:sticky lg:top-24">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Filters</h2>
             
             {/* Material */}
@@ -299,7 +313,7 @@ export default function JewelryPage() {
           ) : (
             <motion.div
               layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-8"
+              className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-8"
             >
             {filteredItems.slice(0, 12).map((item, index) => (
             <Link href={`/product/${item.id}`} key={item.id}>
@@ -312,7 +326,7 @@ export default function JewelryPage() {
                 className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer group border border-gray-200 hover:border-gray-400"
               >
               {/* Image Container */}
-              <div className="relative w-full h-80 overflow-hidden rounded-t-3xl">
+              <div className="relative w-full h-48 sm:h-64 lg:h-80 overflow-hidden rounded-t-3xl">
                 <Image
                   src={item.image}
                   alt={item.name}
@@ -364,33 +378,33 @@ export default function JewelryPage() {
               </div>
               
               {/* Product Info */}
-              <div className="p-6">
-                <div className="mb-4">
-                  <h3 className="font-bold text-gray-800 text-lg mb-2 line-clamp-1">
+              <div className="p-3 sm:p-4 lg:p-6">
+                <div className="mb-3 lg:mb-4">
+                  <h3 className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg mb-1 lg:mb-2 line-clamp-1">
                     {item.name}
                   </h3>
-                  <p className="text-gray-600 text-sm line-clamp-2">
+                  <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 hidden sm:block">
                     {item.description}
                   </p>
                 </div>
                 
                 {/* Tags */}
-                <div className="flex gap-2 mb-4">
-                  <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium border border-gray-300">
+                <div className="flex gap-1 sm:gap-2 mb-3 lg:mb-4 hidden sm:flex">
+                  <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium border border-gray-300">
                     {item.material ? item.material.replace('-', ' ') : 'N/A'}
                   </span>
-                  <span className="px-3 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-medium">
+                  <span className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-medium">
                     {item.subcategory}
                   </span>
                 </div>
                 
                 {/* Price and Rating */}
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-gray-800">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
+                  <span className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">
                     {item.price}
                   </span>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Star className="text-gray-800 fill-current mr-1" size={16} />
+                  <div className="flex items-center text-xs sm:text-sm text-gray-600 mt-1 sm:mt-0">
+                    <Star className="text-gray-800 fill-current mr-1" size={14} />
                     <span className="font-semibold">{item.rating} ({item.reviews})</span>
                   </div>
                 </div>
@@ -401,6 +415,7 @@ export default function JewelryPage() {
             ))}
             </motion.div>
           )}
+          </div>
         </div>
       </div>
       <Footer />
