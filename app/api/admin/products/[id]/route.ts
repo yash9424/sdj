@@ -44,16 +44,16 @@ export async function PUT(
   try {
     console.log('PUT request received for ID:', params.id)
     
-    const formData = await request.formData()
-    console.log('FormData received')
+    const body = await request.json()
+    console.log('JSON body received:', body)
     
     const updateData = {
-      name: formData.get('name'),
-      category: formData.get('category'),
-      price: parseFloat(formData.get('discountedPrice') as string) || 0,
-      description: formData.get('description'),
-      material: formData.get('material'),
-      stock: parseInt(formData.get('stock') as string) || 0,
+      name: body.name,
+      category: body.category,
+      price: parseFloat(body.discountedPrice) || 0,
+      description: body.description,
+      material: body.material,
+      stock: parseInt(body.stock) || 0,
       updatedAt: new Date()
     }
     

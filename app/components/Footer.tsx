@@ -28,14 +28,10 @@ export default function Footer() {
                 <Facebook size={20} />
               </a>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center text-gray-600">
-                <Mail className="mr-2" size={16} />
-                hello@luxejewelry.com
-              </div>
+            <div className="flex items-center justify-center text-sm">
               <div className="flex items-center text-gray-600">
                 <Phone className="mr-2" size={16} />
-                +1 (555) 123-4567
+                +91 96645 12597
               </div>
             </div>
           </div>
@@ -52,10 +48,10 @@ export default function Footer() {
               <Image src="/logo.png" alt="Logo" width={32} height={52} />
               <div className="flex flex-col leading-none">
                 <span className="text-lg font-bold text-gray-800 tracking-wide">
-                  Scottsdale & Diamond
+                  NR CRAFTED
                 </span>
                 <span className="text-sm font-medium text-gray-600 uppercase tracking-widest">
-                  Company
+                  JEWELLERY
                 </span>
               </div>
             </motion.div>
@@ -66,21 +62,21 @@ export default function Footer() {
             </p>
             <div className="flex items-center text-gray-600 mb-2">
               <MapPin className="mr-2" size={16} />
-              <span className="text-sm">123 Luxury Ave, NYC 10001</span>
+              <span className="text-sm">415 - 4th floor, Sanskar Heights, 150 ft. ring road, rajkot</span>
             </div>
           </div>
 
           <div>
             <h4 className="text-lg font-bold mb-4 text-gray-800">Quick Links</h4>
             <div className="space-y-3">
+              <Link href="/" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
+                → Home
+              </Link>
               <Link href="/jewelry" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
                 → Jewelry Collection
               </Link>
-              <Link href="/boutique" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
-                → Personal Styling
-              </Link>
-              <Link href="/blog" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
-                → Style Blog
+              <Link href="/about" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
+                → About Us
               </Link>
             </div>
           </div>
@@ -107,7 +103,6 @@ export default function Footer() {
             <h4 className="text-lg font-bold mb-4 text-gray-800">Customer Care</h4>
             <div className="space-y-3">
               <p className="text-gray-600 text-sm">📞 Mon-Sat 9AM-7PM EST</p>
-              <p className="text-gray-600 text-sm">✨ Free shipping over $200</p>
               <p className="text-gray-600 text-sm">🔄 30-day returns</p>
               <p className="text-gray-600 text-sm">💎 Lifetime warranty</p>
             </div>
@@ -117,7 +112,7 @@ export default function Footer() {
         <div className="border-t border-gray-300 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-600 text-xs sm:text-sm mb-4 md:mb-0 text-center md:text-left">
-              © 2024 Scottsdale & Diamond Company. All rights reserved. <br />
+              © 2024 NR Crafted Jewellery. All rights reserved. <br />
               Designed & Developed by <a href="https://www.technovatechnologies.com/" target="_blank" rel="noopener noreferrer" className="text-gray-800 font-medium hover:text-gray-600 transition-colors">Technova Technologies</a>
             </p>
 

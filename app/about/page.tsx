@@ -45,7 +45,7 @@ export default function AboutPage() {
             transition={{ delay: 0.5 }}
             className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-light text-white fw-700 mb-6 sm:mb-8 leading-tight tracking-wide"
           >
-            We are <span className="italic">Scottsdale & Diamond Company</span>
+            We are <span className="italic">NR Crafted Jewellery</span>
           </motion.h1>
 
           <motion.p 
@@ -76,18 +76,14 @@ export default function AboutPage() {
             <div className="w-16 sm:w-20 lg:w-24 h-px bg-gray-800 mx-auto"></div>
           </motion.div>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed mb-6">
-              At Scottsdale & Diamond Company, heritage is more than the past—it is the quiet confidence we inherit, 
-              the timeless beauty we choose, and the elegance we carry forward. Our story begins with a reverence for craftsmanship. Every diamond, every gold setting, every clasp 
-              is a testament to artistry passed down through generations of jewelers who understood that true luxury 
-              is not loud—it is enduring.
+              At NR Crafted Jewellery, heritage is more than the past—it is the quiet confidence we inherit, the timeless beauty we choose, and the elegance we carry forward.
+              Our story begins with a reverence for craftsmanship. Every diamond, every gold setting, every clasp is a testament to artistry refined through generations of jewelers who knew that true luxury is not loud—it is enduring.
+              We draw inspiration from timeless elegance and modern sophistication—where beauty is lived, not displayed, and every moment is savored.
             </p>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">
-              We draw inspiration from Scottsdale itself—a place where desert light meets refined leisure, where 
-              moments are savored, and elegance is lived, not performed. This spirit informs every collection we 
-              create: classic, sunlit, and sophisticated, with a touch of old-world grace. Heritage also means responsibility. Each piece is thoughtfully sourced and ethically crafted, designed 
-              to be as lasting as the memories it celebrates. Jewelry that begins with one generation and becomes 
-              the treasure of the next.Scottsdale Diamond Company is not just about the jewelry you wear today—it's about the story you pass on tomorrow.
-
+              This spirit shapes every collection we create: classic, refined, and graceful, with a touch of contemporary allure.
+              Heritage also means responsibility. Each piece is thoughtfully sourced and ethically crafted, designed to last as long as the memories it celebrates. Jewellery that begins with one generation and becomes the treasure of the next.
+              At NR Crafted Jewellery, we don’t just create ornaments for today—we craft heirlooms that carry your story into tomorrow.
             </p>
             
           </motion.div>
@@ -134,8 +130,7 @@ export default function AboutPage() {
             className="text-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"
           >
             <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-600 leading-relaxed">
-              "We design jewelry meant to be lived in—crafted with enduring quality and understated elegance. Each piece carries quiet confidence, becoming part of your story today and a treasure for tomorrow."            
-            </p>
+"Your story, our craft—jewellery designed to be lived in today and remembered forever."            </p>
           </motion.div>
         </div>
       </section>
@@ -166,16 +161,17 @@ export default function AboutPage() {
             </h3>
             
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed mb-4 sm:mb-5">
-                  In a world where fine jewelry often hides behind inflated markups and opaque 
-                  practices, Scottsdale Diamond Company chooses a different path. We believe luxury 
-                  should feel effortless and honest, rooted in integrity as much as in beauty.            
+                  In a world where fine jewellery is often hidden behind inflated markups and opaque practices, NR Crafted Jewellery chooses a 
+                  different path. We believe true luxury should be effortless and honest—rooted in integrity as much as in beauty.     
+            </p>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed mb-4 sm:mb-5">
+                  Every piece we create is crafted with care, using ethically sourced diamonds and responsibly refined metals. Designed to 
+                  embody both sophistication and conscience, our jewellery reflects a standard of excellence that goes beyond aesthetics.     
             </p>
 
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
-                  Our pieces are thoughtfully crafted with ethically sourced diamonds and responsibly 
-                  refined metals, designed to reflect both sophistication and conscience. Every creation 
-                  meets the highest standards of quality while honoring the trust of our customers—and the 
-                  generations who will wear our jewelry after them.
+                 At NR Crafted Jewellery, we honor not just the trust of those who wear our creations today, but also the generations who 
+                 will inherit them tomorrow. Because jewellery is more than adornment—it is a legacy of values, memories, and timeless craft.
             </p>
           </motion.div>
         </div>
@@ -249,16 +245,16 @@ export default function AboutPage() {
           >
             <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extralight text-gray-600 mb-4 sm:mb-6 tracking-wide">Start Your Custom Journey</h3>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed mb-6 sm:mb-8 lg:mb-10 opacity-90">
-              A custom piece from Scottsdale Diamond Company isn't just a design—it's a legacy in the making.<br className="hidden sm:block"/>
+              A custom piece from NR Crafted Jewellery isn't just a design—it's a legacy in the making.<br className="hidden sm:block"/>
               Let's begin something unforgettable.
             </p>
-            <Link href="/boutique">
+            <Link href="/jewelry">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-gradient-to-r from-gray-800 to-gray-700 text-white px-8 sm:px-10 lg:px-12 py-3 sm:py-4 rounded-full font-medium text-base sm:text-lg tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 inline-flex items-center gap-2 sm:gap-3"
               >
-                Talk to a Diamond Expert
+                Explore Our Collection
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}

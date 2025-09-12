@@ -137,13 +137,13 @@ export default function HomePage() {
           </motion.div>
           
            <h1 className="text-3xl sm:text-4xl lg:text-5xl pt-6 font-space font-black text-white mb-6 leading-tight text-start">
-            NOW TRENDING
+            YOUR STORY, OUR CRAFT.
             <br />
             {/* <span className="text-yellow-400">JEWELRY</span> */}
           </h1>
           
           <p className="text-lg sm:text-xl lg:text-2xl text-gray-200 mb-8 font-light">
-            Stack it. Layer it. Own it.
+            Custom jewellery designed to reflect you—today, tomorrow, forever.
           </p> 
 
           <div className="flex space-x-4">
@@ -155,16 +155,6 @@ export default function HomePage() {
               >
                 Shop Now
                 {/* <ArrowRight className="ml-2" size={20} /> */}
-              </motion.button>
-            </Link>
-
-            <Link href="/boutique">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4  font-bold text-lg transition-all duration-300"
-              >
-                Customize
               </motion.button>
             </Link>
           </div>
@@ -229,7 +219,7 @@ export default function HomePage() {
               </div>
               
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight">
-                At Scottsdale & Diamond Company,
+                At NR Crafted Jewellery,
                 <span className="block text-gray-600 text-2xl sm:text-3xl mt-2">what kind of life will this belong to?</span>
               </h2>
               
@@ -259,15 +249,6 @@ export default function HomePage() {
                     className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
                   >
                     Explore Collection
-                  </motion.button>
-                </Link>
-                <Link href="/boutique">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="border-2 border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-                  >
-                    Custom Design
                   </motion.button>
                 </Link>
               </div>

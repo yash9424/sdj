@@ -36,9 +36,15 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/admin/users')
+      console.log('Response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
-        setUsers(data.users)
+        console.log('API response data:', data)
+        setUsers(data.users || [])
+      } else {
+        const errorData = await response.json()
+        console.error('API error:', errorData)
       }
     } catch (error) {
       console.error('Failed to fetch users:', error)

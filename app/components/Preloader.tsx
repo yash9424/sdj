@@ -27,12 +27,12 @@ export default function Preloader() {
       <div className="absolute inset-0 bg-gradient-to-r from-gray-100/20 via-white/30 to-gray-100/20 animate-pulse" style={{animationDuration: '3s'}} />
       <div className="text-center relative z-10">
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="mb-6"
         >
-          <img src="/preloaderlogo.png" alt="Logo" className="w-56 h-66 mx-auto" />
+          <img src="/logo.png" alt="Logo" className="w-32 h-auto mx-auto" />
         </motion.div>
         
         <motion.div
@@ -44,7 +44,7 @@ export default function Preloader() {
           <motion.h1
             className="text-4xl font-bold text-gray-800 uppercase tracking-wide"
           >
-            {'Scottsdale  &  Diamond'.split('').map((char, index) => (
+            {'NR CRAFTED'.split('').map((char, index) => (
               <motion.span
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -61,7 +61,7 @@ export default function Preloader() {
             transition={{ delay: 0.8 }}
             className="text-4xl text-gray-600 uppercase tracking-widest mt-2"
           >
-            Company
+            JEWELLERY
           </motion.p>
         </motion.div>
         

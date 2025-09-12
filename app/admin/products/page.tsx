@@ -175,70 +175,95 @@ export default function ProductsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    const formDataToSend = new FormData()
-    formDataToSend.append('name', formData.name)
-    formDataToSend.append('category', formData.category)
-    formDataToSend.append('mainPrice', formData.mainPrice)
-    formDataToSend.append('discountedPrice', formData.discountedPrice)
-    formDataToSend.append('description', formData.description)
-    formDataToSend.append('material', formData.material)
-    formDataToSend.append('color', formData.color)
-    formDataToSend.append('style', formData.style)
-    formDataToSend.append('metalWeight', `${formData.metalWeight}${formData.weightUnit}`)
-    formDataToSend.append('purity', formData.purity)
-    formDataToSend.append('stock', formData.stock)
-    formDataToSend.append('feature1', formData.feature1)
-    formDataToSend.append('feature2', formData.feature2)
-    formDataToSend.append('feature3', formData.feature3)
-    formDataToSend.append('feature4', formData.feature4)
-    
-    if (formData.mainImage && typeof formData.mainImage !== 'string') formDataToSend.append('mainImage', formData.mainImage)
-    if (formData.image1 && typeof formData.image1 !== 'string') formDataToSend.append('image1', formData.image1)
-    if (formData.image2 && typeof formData.image2 !== 'string') formDataToSend.append('image2', formData.image2)
-    if (formData.image3 && typeof formData.image3 !== 'string') formDataToSend.append('image3', formData.image3)
-    if (formData.image4 && typeof formData.image4 !== 'string') formDataToSend.append('image4', formData.image4)
-
     try {
-      const url = showEditModal && selectedProduct 
-        ? `/api/admin/products/${selectedProduct._id}` 
-        : '/api/admin/products'
-      const method = showEditModal ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
-        body: formDataToSend
-      })
-      
-      if (response.ok) {
-        setShowAddModal(false)
-        setShowEditModal(false)
-        fetchProducts()
-        setFormData({
-          name: '',
-          category: 'combo-set',
-          mainPrice: '',
-          discountedPrice: '',
-          description: '',
-          material: 'diamond',
-          color: '',
-          style: '',
-          metalWeight: '',
-          weightUnit: 'g',
-          purity: '',
-          stock: '',
-          feature1: '',
-          feature2: '',
-          feature3: '',
-          feature4: '',
-          mainImage: null as File | string | null,
-          image1: null as File | string | null,
-          image2: null as File | string | null,
-          image3: null as File | string | null,
-          image4: null as File | string | null
+      if (showEditModal && selectedProduct) {
+        // Edit mode - use simple JSON
+        const response = await fetch(`/api/admin/products/${selectedProduct._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            category: formData.category,
+            discountedPrice: formData.discountedPrice,
+            description: formData.description,
+            material: formData.material,
+            stock: formData.stock
+          })
         })
+        
+        if (response.ok) {
+          setShowEditModal(false)
+          fetchProducts()
+          alert('Product updated successfully!')
+        } else {
+          alert('Failed to update product')
+        }
+      } else {
+        // Add mode - use FormData
+        const formDataToSend = new FormData()
+        formDataToSend.append('name', formData.name)
+        formDataToSend.append('category', formData.category)
+        formDataToSend.append('mainPrice', formData.mainPrice)
+        formDataToSend.append('discountedPrice', formData.discountedPrice)
+        formDataToSend.append('description', formData.description)
+        formDataToSend.append('material', formData.material)
+        formDataToSend.append('color', formData.color)
+        formDataToSend.append('style', formData.style)
+        formDataToSend.append('metalWeight', `${formData.metalWeight}${formData.weightUnit}`)
+        formDataToSend.append('purity', formData.purity)
+        formDataToSend.append('stock', formData.stock)
+        formDataToSend.append('feature1', formData.feature1)
+        formDataToSend.append('feature2', formData.feature2)
+        formDataToSend.append('feature3', formData.feature3)
+        formDataToSend.append('feature4', formData.feature4)
+        
+        if (formData.mainImage && typeof formData.mainImage !== 'string') formDataToSend.append('mainImage', formData.mainImage)
+        if (formData.image1 && typeof formData.image1 !== 'string') formDataToSend.append('image1', formData.image1)
+        if (formData.image2 && typeof formData.image2 !== 'string') formDataToSend.append('image2', formData.image2)
+        if (formData.image3 && typeof formData.image3 !== 'string') formDataToSend.append('image3', formData.image3)
+        if (formData.image4 && typeof formData.image4 !== 'string') formDataToSend.append('image4', formData.image4)
+
+        const response = await fetch('/api/admin/products', {
+          method: 'POST',
+          body: formDataToSend
+        })
+        
+        if (response.ok) {
+          setShowAddModal(false)
+          fetchProducts()
+          alert('Product added successfully!')
+        } else {
+          alert('Failed to add product')
+        }
       }
+      
+      setFormData({
+        name: '',
+        category: 'combo-set',
+        mainPrice: '',
+        discountedPrice: '',
+        description: '',
+        material: 'diamond',
+        color: '',
+        style: '',
+        metalWeight: '',
+        weightUnit: 'g',
+        purity: '',
+        stock: '',
+        feature1: '',
+        feature2: '',
+        feature3: '',
+        feature4: '',
+        mainImage: null as File | string | null,
+        image1: null as File | string | null,
+        image2: null as File | string | null,
+        image3: null as File | string | null,
+        image4: null as File | string | null
+      })
     } catch (error) {
-      console.error('Failed to add product:', error)
+      console.error('Failed to handle product:', error)
     }
   }
 
