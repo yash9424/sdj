@@ -10,7 +10,7 @@ import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useAuth } from '../context/AuthContext'
 import { useRouter } from 'next/navigation'
-import { jewelryItems, jewelryCategories, subcategories, materials, colors, sortOptions, priceRanges } from '../data/jewelryData'
+import { jewelryCategories, subcategories, materials, colors, sortOptions, priceRanges } from '../data/jewelryData'
 
 interface Product {
   _id: string
@@ -63,26 +63,23 @@ export default function JewelryPage() {
     }
   }
 
-  const allItems = [
-    ...(selectedCategory === 'all' ? jewelryItems : jewelryItems.filter(item => item.category !== 'necklace' && (selectedCategory === 'all' || item.category === selectedCategory))),
-    ...products.map(p => ({
-      id: p._id,
-      name: p.name,
-      category: p.category,
-      price: `₹${p.price.toLocaleString()}`,
-      priceValue: p.price,
-      mainPrice: p.mainPrice,
-      image: p.image,
-      images: p.images,
-      description: p.description,
-      material: p.material || 'gold',
-      color: 'gold',
-      subcategory: p.category,
-      rating: p.rating,
-      reviews: p.reviews,
-      features: p.features
-    }))
-  ]
+  const allItems = products.map(p => ({
+    id: p._id,
+    name: p.name,
+    category: p.category,
+    price: `₹${p.price.toLocaleString()}`,
+    priceValue: p.price,
+    mainPrice: p.mainPrice,
+    image: p.image,
+    images: p.images,
+    description: p.description,
+    material: p.material || 'gold',
+    color: 'gold',
+    subcategory: p.category,
+    rating: p.rating || 4.5,
+    reviews: p.reviews || 0,
+    features: p.features
+  }))
 
   const filteredItems = allItems.filter(item => {
     const categoryMatch = selectedCategory === 'all' || item.category === selectedCategory
@@ -383,19 +380,12 @@ export default function JewelryPage() {
                   <h3 className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg mb-1 lg:mb-2 line-clamp-1">
                     {item.name}
                   </h3>
-                  <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 hidden sm:block">
-                    {item.description}
-                  </p>
-                </div>
-                
-                {/* Tags */}
-                <div className="flex gap-1 sm:gap-2 mb-3 lg:mb-4 hidden sm:flex">
-                  <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium border border-gray-300">
-                    {item.material ? item.material.replace('-', ' ') : 'N/A'}
-                  </span>
-                  <span className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-medium">
-                    {item.subcategory}
-                  </span>
+                  {/* Discounted Price */}
+                  {item.mainPrice && (
+                    <div className="text-sm text-gray-500 line-through">
+                      ₹{item.mainPrice.toLocaleString()}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Price and Rating */}
