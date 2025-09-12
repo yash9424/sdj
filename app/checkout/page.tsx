@@ -22,6 +22,11 @@ export default function CheckoutPage() {
     cardName: ''
   })
   const [paymentMethod, setPaymentMethod] = useState('card')
+  const [notification, setNotification] = useState<{
+    show: boolean
+    type: 'success' | 'error'
+    message: string
+  }>({ show: false, type: 'success', message: '' })
 
   const subtotal = getTotalPrice()
   const shipping = subtotal > 1000 ? 0 : 50
@@ -35,7 +40,12 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Payment processing logic would go here
-    alert('Payment processed successfully!')
+    setNotification({
+      show: true,
+      type: 'success',
+      message: 'Payment processed successfully!'
+    })
+    setTimeout(() => setNotification({ show: false, type: 'success', message: '' }), 3000)
   }
 
   return (
@@ -293,6 +303,26 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+      
+      {/* Notification */}
+      {notification.show && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className={`flex items-center space-x-3 px-6 py-4 rounded-lg shadow-lg border-2 ${
+            notification.type === 'success' 
+              ? 'bg-green-50 border-green-200 text-green-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            <span className="font-medium">{notification.message}</span>
+            <button
+              onClick={() => setNotification({ show: false, type: 'success', message: '' })}
+              className="ml-2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+      
       <Footer />
     </div>
   )

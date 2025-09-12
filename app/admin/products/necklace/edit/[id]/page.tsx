@@ -35,6 +35,11 @@ export default function EditNecklacePage({ params }: { params: { id: string } })
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [notification, setNotification] = useState<{
+    show: boolean
+    type: 'success' | 'error'
+    message: string
+  }>({ show: false, type: 'success', message: '' })
 
   const purityOptions = [
     { value: '24K', label: '24K (99.9% pure gold, very soft)' },
@@ -159,14 +164,28 @@ export default function EditNecklacePage({ params }: { params: { id: string } })
       })
 
       if (response.ok) {
-        alert('Necklace updated successfully!')
-        window.location.href = '/admin/products/necklace'
+        setNotification({
+          show: true,
+          type: 'success',
+          message: 'Necklace updated successfully!'
+        })
+        setTimeout(() => {
+          window.location.href = '/admin/products/necklace'
+        }, 1500)
       } else {
-        alert('Failed to update necklace')
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Failed to update necklace'
+        })
       }
     } catch (error) {
       console.error('Error updating necklace:', error)
-      alert('Error updating necklace')
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Error updating necklace'
+      })
     } finally {
       setSaving(false)
     }
@@ -530,6 +549,25 @@ export default function EditNecklacePage({ params }: { params: { id: string } })
           </button>
         </div>
       </form>
+      
+      {/* Notification */}
+      {notification.show && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className={`flex items-center space-x-3 px-6 py-4 rounded-lg shadow-lg border-2 ${
+            notification.type === 'success' 
+              ? 'bg-green-50 border-green-200 text-green-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            <span className="font-medium">{notification.message}</span>
+            <button
+              onClick={() => setNotification({ ...notification, show: false })}
+              className="ml-2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

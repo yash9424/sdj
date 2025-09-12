@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, Edit, Trash2, Eye, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import ConfirmModal from '../../components/ConfirmModal'
 
 interface Product {
   _id: string
@@ -43,6 +44,12 @@ export default function NecklacePage() {
   const [selectAll, setSelectAll] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 10
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} })
 
   useEffect(() => {
     fetchNecklaceProducts()
@@ -64,18 +71,23 @@ export default function NecklacePage() {
   }
 
   const deleteProduct = async (productId: string) => {
-    if (confirm('Are you sure you want to delete this necklace?')) {
-      try {
-        const response = await fetch(`/api/admin/products/${productId}`, {
-          method: 'DELETE'
-        })
-        if (response.ok) {
-          setProducts(products.filter(product => product._id !== productId))
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Necklace',
+      message: 'Are you sure you want to delete this necklace? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/products/${productId}`, {
+            method: 'DELETE'
+          })
+          if (response.ok) {
+            setProducts(products.filter(product => product._id !== productId))
+          }
+        } catch (error) {
+          console.error('Failed to delete product:', error)
         }
-      } catch (error) {
-        console.error('Failed to delete product:', error)
       }
-    }
+    })
   }
 
   const handleSelectAll = () => {
@@ -98,19 +110,24 @@ export default function NecklacePage() {
   const deleteSelectedProducts = async () => {
     if (selectedProducts.length === 0) return
     
-    if (confirm(`Are you sure you want to delete ${selectedProducts.length} selected necklaces?`)) {
-      try {
-        const deletePromises = selectedProducts.map(productId => 
-          fetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
-        )
-        await Promise.all(deletePromises)
-        setProducts(products.filter(product => !selectedProducts.includes(product._id)))
-        setSelectedProducts([])
-        setSelectAll(false)
-      } catch (error) {
-        console.error('Failed to delete products:', error)
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Multiple Necklaces',
+      message: `Are you sure you want to delete ${selectedProducts.length} selected necklaces? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const deletePromises = selectedProducts.map(productId => 
+            fetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
+          )
+          await Promise.all(deletePromises)
+          setProducts(products.filter(product => !selectedProducts.includes(product._id)))
+          setSelectedProducts([])
+          setSelectAll(false)
+        } catch (error) {
+          console.error('Failed to delete products:', error)
+        }
       }
-    }
+    })
   }
 
   const filteredProducts = products.filter(product => {
@@ -356,6 +373,16 @@ export default function NecklacePage() {
           </div>
         </div>
       )}
+      
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText="Delete"
+        type="danger"
+      />
     </div>
   )
 }
