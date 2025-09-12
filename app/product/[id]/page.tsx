@@ -369,19 +369,19 @@ export default function ProductDetailPage() {
         <div className="mt-8 sm:mt-12 lg:mt-16 px-4 sm:px-0">
           {/* Mobile/Tablet Accordion */}
           <div className="md:hidden space-y-2">
-            {((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace)) && (
+            {((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace) || (product.category === 'earrings' && product.productDetails?.earrings) || (product.category === 'bracelet' && product.productDetails?.bracelet)) && (
               <div className="border border-gray-200 rounded-lg">
                 <button
                   onClick={() => setActiveTab(activeTab === 'details' ? '' : 'details')}
                   className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
                 >
-                  <span>Product Details</span>
+                  <span>{product.category === 'combo-set' ? 'Product Details' : product.category === 'necklace' ? 'Necklace Details' : product.category === 'earrings' ? 'Earrings Details' : product.category === 'bracelet' ? 'Bengals Details' : 'Product Details'}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${activeTab === 'details' ? 'rotate-180' : ''}`} />
                 </button>
                 {activeTab === 'details' && (
                   <div className="px-4 pb-4 border-t border-gray-200">
                     <div className="prose max-w-none">
-                      <h4 className="text-base sm:text-lg font-semibold mb-3">{product.category === 'combo-set' ? 'Complete Set Details' : 'Necklace Details'}</h4>
+                      <h4 className="text-base sm:text-lg font-semibold mb-3">{product.category === 'combo-set' ? 'Complete Set Details' : product.category === 'necklace' ? 'Necklace Details' : product.category === 'earrings' ? 'Earrings Details' : product.category === 'bracelet' ? 'Bengals Details' : 'Product Details'}</h4>
                       <div className="space-y-4 sm:space-y-6">
                         {product.productDetails.necklace && (
                           <div>
@@ -421,6 +421,21 @@ export default function ProductDetailPage() {
                               <div><strong>Style:</strong> {product.productDetails.earrings.style || 'N/A'}</div>
                               <div><strong>Closure:</strong> {product.productDetails.earrings.closure || 'N/A'}</div>
                               <div><strong>Drop Length:</strong> {product.productDetails.earrings.dropLength || 'N/A'}</div>
+                            </div>
+                          </div>
+                        )}
+                        {product.productDetails.bracelet && (
+                          <div>
+                            <h5 className="font-semibold text-black mb-2 text-sm sm:text-base">🔗 Bengals Specifications</h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-gray-700 pl-2 sm:pl-4 text-xs sm:text-sm">
+                              <div><strong>Material:</strong> {product.productDetails.bracelet.material}</div>
+                              <div><strong>Color:</strong> {product.productDetails.bracelet.color || 'N/A'}</div>
+                              <div><strong>Weight:</strong> {product.productDetails.bracelet.weight || 'N/A'}</div>
+                              <div><strong>Purity:</strong> {product.productDetails.bracelet.purity || 'N/A'}</div>
+                              <div><strong>Style:</strong> {product.productDetails.bracelet.style || 'N/A'}</div>
+                              <div><strong>Size:</strong> {product.productDetails.bracelet.size || 'N/A'}</div>
+                              <div><strong>Adjustable:</strong> {product.productDetails.bracelet.adjustable || 'N/A'}</div>
+                              <div><strong>Clasp:</strong> {product.productDetails.bracelet.clasp || 'N/A'}</div>
                             </div>
                           </div>
                         )}
@@ -553,6 +568,30 @@ export default function ProductDetailPage() {
                             <li>• Layer different lengths for a trendy look</li>
                           </ul>
                         </div>
+                      ) : product.category === 'earrings' ? (
+                        <div>
+                          <h5 className="font-medium mb-2 text-sm sm:text-base">💍 Earrings Sizing Tips</h5>
+                          <ul className="space-y-1 text-xs sm:text-sm">
+                            <li>• Stud: 4-8mm diameter for everyday wear</li>
+                            <li>• Drop: 1-3" length for elegant occasions</li>
+                            <li>• Hoop: 15-25mm diameter for versatile style</li>
+                            <li>• Consider face shape and hair length</li>
+                            <li>• Push back closures are most secure</li>
+                            <li>• Screw backs recommended for valuable pieces</li>
+                          </ul>
+                        </div>
+                      ) : product.category === 'bracelet' ? (
+                        <div>
+                          <h5 className="font-medium mb-2 text-sm sm:text-base">🔗 Bengals Sizing Tips</h5>
+                          <ul className="space-y-1 text-xs sm:text-sm">
+                            <li>• Small: 6.5-7" wrist circumference</li>
+                            <li>• Medium: 7-7.5" wrist circumference</li>
+                            <li>• Large: 7.5-8" wrist circumference</li>
+                            <li>• Measure wrist at widest point with a tape measure</li>
+                            <li>• Add 0.5" for comfortable fit</li>
+                            <li>• Adjustable bengals fit most wrist sizes</li>
+                          </ul>
+                        </div>
                       ) : (
                         <div>
                           <h5 className="font-medium mb-2 text-sm sm:text-base">Ring Sizing Tips</h5>
@@ -574,7 +613,7 @@ export default function ProductDetailPage() {
           {/* Desktop/Tablet Tabs */}
           <div className="hidden md:block border-b border-gray-200">
             <nav className="-mb-px flex flex-wrap gap-4 md:gap-6 lg:gap-8">
-              {((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace)) && (
+              {((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace) || (product.category === 'earrings' && product.productDetails?.earrings) || (product.category === 'bracelet' && product.productDetails?.bracelet)) && (
                 <button 
                   onClick={() => setActiveTab('details')}
                   className={`border-b-2 py-2 px-1 text-sm font-medium ${
@@ -583,7 +622,7 @@ export default function ProductDetailPage() {
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  Product Details
+                  {product.category === 'combo-set' ? 'Product Details' : product.category === 'necklace' ? 'Necklace Details' : product.category === 'earrings' ? 'Earrings Details' : product.category === 'bracelet' ? 'Bengals Details' : 'Product Details'}
                 </button>
               )}
               <button 
@@ -619,9 +658,9 @@ export default function ProductDetailPage() {
             </nav>
           </div>
           <div className="hidden md:block py-4 sm:py-6 px-4 sm:px-0">
-            {activeTab === 'details' && ((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace)) && (
+            {activeTab === 'details' && ((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace) || (product.category === 'earrings' && product.productDetails?.earrings) || (product.category === 'bracelet' && product.productDetails?.bracelet)) && (
               <div className="prose max-w-none">
-                <h4 className="text-base sm:text-lg font-semibold mb-3">{product.category === 'combo-set' ? 'Complete Set Details' : 'Necklace Details'}</h4>
+                <h4 className="text-base sm:text-lg font-semibold mb-3">{product.category === 'combo-set' ? 'Complete Set Details' : product.category === 'necklace' ? 'Necklace Details' : product.category === 'earrings' ? 'Earrings Details' : product.category === 'bracelet' ? 'Bengals Details' : 'Product Details'}</h4>
                 <div className="space-y-4 sm:space-y-6">
                   {/* Necklace Details */}
                   {product.productDetails.necklace && (
@@ -666,6 +705,21 @@ export default function ProductDetailPage() {
                         <div><strong>Style:</strong> {product.productDetails.earrings.style || 'N/A'}</div>
                         <div><strong>Closure:</strong> {product.productDetails.earrings.closure || 'N/A'}</div>
                         <div><strong>Drop Length:</strong> {product.productDetails.earrings.dropLength || 'N/A'}</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Bracelet Details */}
+                  {product.productDetails.bracelet && (
+                    <div>
+                      <h5 className="font-semibold text-black mb-2 text-sm sm:text-base">🔗 Bengals Specifications</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-gray-700 pl-2 sm:pl-4 text-xs sm:text-sm">
+                        <div><strong>Material:</strong> {product.productDetails.bracelet.material}</div>
+                        <div><strong>Color:</strong> {product.productDetails.bracelet.color || 'N/A'}</div>
+                        <div><strong>Weight:</strong> {product.productDetails.bracelet.weight || 'N/A'}</div>
+                        <div><strong>Purity:</strong> {product.productDetails.bracelet.purity || 'N/A'}</div>
+                        <div><strong>Style:</strong> {product.productDetails.bracelet.style || 'N/A'}</div>
+                        <div><strong>Size:</strong> {product.productDetails.bracelet.size || 'N/A'}</div>
                       </div>
                     </div>
                   )}
@@ -759,6 +813,30 @@ export default function ProductDetailPage() {
                         <li>• 24" - Opera length, sits at breastbone</li>
                         <li>• Consider your neckline and personal style preference</li>
                         <li>• Layer different lengths for a trendy look</li>
+                      </ul>
+                    </div>
+                  ) : product.category === 'earrings' ? (
+                    <div>
+                      <h5 className="font-medium mb-2">💍 Earrings Sizing Tips</h5>
+                      <ul className="space-y-1">
+                        <li>• Stud: 4-8mm diameter for everyday wear</li>
+                        <li>• Drop: 1-3" length for elegant occasions</li>
+                        <li>• Hoop: 15-25mm diameter for versatile style</li>
+                        <li>• Consider face shape and hair length</li>
+                        <li>• Push back closures are most secure</li>
+                        <li>• Screw backs recommended for valuable pieces</li>
+                      </ul>
+                    </div>
+                  ) : product.category === 'bracelet' ? (
+                    <div>
+                      <h5 className="font-medium mb-2">🔗 Bengals Sizing Tips</h5>
+                      <ul className="space-y-1">
+                        <li>• Small: 6.5-7" wrist circumference</li>
+                        <li>• Medium: 7-7.5" wrist circumference</li>
+                        <li>• Large: 7.5-8" wrist circumference</li>
+                        <li>• Measure wrist at widest point with a tape measure</li>
+                        <li>• Add 0.5" for comfortable fit</li>
+                        <li>• Adjustable bengals fit most wrist sizes</li>
                       </ul>
                     </div>
                   ) : (
