@@ -6,6 +6,7 @@ interface CartItem {
   id: number
   name: string
   price: string
+  priceValue?: number
   image: string
   quantity: number
   category: string
@@ -66,7 +67,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
-      const price = parseFloat(item.price.replace('$', '').replace(',', ''))
+      let price = 0
+      if (item.priceValue) {
+        price = item.priceValue
+      } else if (typeof item.price === 'string') {
+        price = parseFloat(item.price.replace(/[$₹,]/g, ''))
+      } else {
+        price = item.price
+      }
       return total + (price * item.quantity)
     }, 0)
   }

@@ -267,6 +267,7 @@ export default function ProductDetailPage() {
                       id: product.id,
                       name: product.name,
                       price: product.price,
+                      priceValue: product.priceValue,
                       image: product.image,
                       category: product.category,
                       size: selectedSize

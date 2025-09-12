@@ -12,7 +12,7 @@ export default function CartPage() {
 
   const subtotal = getTotalPrice()
   const shipping = subtotal > 1000 ? 0 : 50
-  const tax = subtotal * 0.08
+  const tax = subtotal * 0.18
   const total = subtotal + shipping + tax
 
   return (
@@ -119,20 +119,20 @@ export default function CartPage() {
             <div className="space-y-4 mb-6">
               <div className="flex justify-between">
                 <span className="text-[#A89F91]/70">Subtotal</span>
-                <span className="font-semibold">${subtotal.toLocaleString()}</span>
+                <span className="font-semibold">₹{subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#A89F91]/70">Shipping</span>
-                <span className="font-semibold">${shipping}</span>
+                <span className="font-semibold">₹{shipping}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#A89F91]/70">Tax</span>
-                <span className="font-semibold">${tax.toFixed(2)}</span>
+                <span className="font-semibold">₹{tax.toFixed(2)}</span>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between text-xl font-bold">
                   <span>Total</span>
-                  <span className="text-[#D4AF37]">${total.toFixed(2)}</span>
+                  <span className="text-[#D4AF37]">₹{total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
