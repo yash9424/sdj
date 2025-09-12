@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const products = db.collection('products')
 
     const allProducts = await products.find({}, { 
-      projection: { name: 1, category: 1, price: 1, mainPrice: 1, image: 1, mainImage: 1, images: 1, description: 1, material: 1, color: 1, style: 1, metalWeight: 1, purity: 1, stock: 1, features: 1, inStock: 1, createdAt: 1 }
+      projection: { name: 1, category: 1, price: 1, mainPrice: 1, image: 1, mainImage: 1, images: 1, description: 1, material: 1, color: 1, style: 1, metalWeight: 1, purity: 1, stock: 1, features: 1, inStock: 1, productDetails: 1, createdAt: 1 }
     }).sort({ createdAt: -1 }).limit(1000).toArray()
     
     const formattedProducts = allProducts.map(product => ({
@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
       purity: product.purity,
       stock: product.stock,
       features: product.features,
+      productDetails: product.productDetails,
       inStock: product.inStock || true,
       createdAt: product.createdAt || new Date().toISOString()
     }))
@@ -68,34 +69,68 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     
+    // Parse product details
+    const productDetailsStr = formData.get('productDetails') as string
+    let productDetails = {}
+    if (productDetailsStr) {
+      try {
+        productDetails = JSON.parse(productDetailsStr)
+      } catch (e) {
+        console.error('Error parsing productDetails:', e)
+      }
+    }
+    
+    // Handle image uploads
+    let mainImageUrl = ''
+    const mainImageFile = formData.get('mainImage') as File
+    if (mainImageFile && mainImageFile.size > 0) {
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', mainImageFile)
+      const uploadResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/upload`, {
+        method: 'POST',
+        body: uploadFormData
+      })
+      if (uploadResponse.ok) {
+        const uploadResult = await uploadResponse.json()
+        mainImageUrl = uploadResult.url
+      }
+    }
+    
+    const imageUrls = []
+    for (let i = 1; i <= 4; i++) {
+      const imageFile = formData.get(`image${i}`) as File
+      if (imageFile && imageFile.size > 0) {
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', imageFile)
+        const uploadResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/upload`, {
+          method: 'POST',
+          body: uploadFormData
+        })
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json()
+          imageUrls.push(uploadResult.url)
+        }
+      }
+    }
+    
     const productData = {
       name: formData.get('name') as string,
       category: formData.get('category') as string,
       mainPrice: parseFloat(formData.get('mainPrice') as string),
-      discountedPrice: parseFloat(formData.get('discountedPrice') as string),
       price: parseFloat(formData.get('discountedPrice') as string),
       description: formData.get('description') as string,
-      material: formData.get('material') as string,
-      color: formData.get('color') as string,
-      style: formData.get('style') as string,
-      metalWeight: formData.get('metalWeight') as string,
-      purity: formData.get('purity') as string,
       stock: parseInt(formData.get('stock') as string) || 0,
+      productDetails,
       features: [
         formData.get('feature1') as string,
         formData.get('feature2') as string,
         formData.get('feature3') as string,
         formData.get('feature4') as string
-      ].filter(f => f),
-      mainImage: formData.get('mainImage') ? `/uploads/${Date.now()}_main.jpg` : '',
-      images: [
-        formData.get('image1') ? `/uploads/${Date.now()}_1.jpg` : '',
-        formData.get('image2') ? `/uploads/${Date.now()}_2.jpg` : '',
-        formData.get('image3') ? `/uploads/${Date.now()}_3.jpg` : '',
-        formData.get('image4') ? `/uploads/${Date.now()}_4.jpg` : ''
-      ].filter(img => img),
-      image: formData.get('mainImage') ? `/uploads/${Date.now()}_main.jpg` : '',
-      inStock: true,
+      ].filter(f => f && f.trim()),
+      mainImage: mainImageUrl,
+      image: mainImageUrl,
+      images: imageUrls,
+      inStock: parseInt(formData.get('stock') as string) > 0,
       rating: 4.5,
       reviews: 0,
       createdAt: new Date()
@@ -113,6 +148,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
+    console.error('POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

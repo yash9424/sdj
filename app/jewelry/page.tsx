@@ -12,6 +12,22 @@ import { useAuth } from '../context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { jewelryItems, jewelryCategories, subcategories, materials, colors, sortOptions, priceRanges } from '../data/jewelryData'
 
+interface Product {
+  _id: string
+  name: string
+  category: string
+  price: number
+  mainPrice?: number
+  image: string
+  images: string[]
+  description: string
+  material: string
+  features: string[]
+  rating: number
+  reviews: number
+  productDetails: any
+}
+
 export default function JewelryPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
@@ -21,12 +37,53 @@ export default function JewelryPage() {
   const [selectedColor, setSelectedColor] = useState('all')
   const [selectedSubcategory, setSelectedSubcategory] = useState('all')
   const [selectedPriceRange, setSelectedPriceRange] = useState(priceRanges[0])
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const { addToCart } = useCart()
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
   const { requireAuth } = useAuth()
   const router = useRouter()
 
-  const filteredItems = jewelryItems.filter(item => {
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('/api/products')
+      if (response.ok) {
+        const data = await response.json()
+        setProducts(data.products)
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const allItems = [
+    ...(selectedCategory === 'all' ? [] : jewelryItems.filter(item => selectedCategory === 'all' || item.category === selectedCategory)),
+    ...products.map(p => ({
+      id: p._id,
+      name: p.name,
+      category: p.category,
+      price: `₹${p.price.toLocaleString()}`,
+      priceValue: p.price,
+      mainPrice: p.mainPrice,
+      image: p.image,
+      images: p.images,
+      description: p.description,
+      material: p.material || 'gold',
+      color: 'gold',
+      subcategory: p.category,
+      rating: p.rating,
+      reviews: p.reviews,
+      features: p.features
+    }))
+  ]
+
+  const filteredItems = allItems.filter(item => {
     const categoryMatch = selectedCategory === 'all' || item.category === selectedCategory
     const typeMatch = selectedType === 'all' || item.category === selectedType
     const materialMatch = selectedMaterials.includes('all') || selectedMaterials.includes(item.material)
@@ -76,9 +133,9 @@ export default function JewelryPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedCategory('ring')}
+            onClick={() => setSelectedCategory('combo-set')}
             className={`px-6 py-3 rounded-full font-semibold text-sm uppercase tracking-wide transition-all ${
-              selectedCategory === 'ring'
+              selectedCategory === 'combo-set'
                 ? 'bg-gray-800 text-white shadow-lg'
                 : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-300'
             }`}
@@ -225,8 +282,13 @@ export default function JewelryPage() {
             </div>
           </div>
 
-          {/* Jewelry Grid */}
-          {filteredItems.length === 0 ? (
+          {/* Loading State */}
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading jewelry...</p>
+            </div>
+          ) : filteredItems.length === 0 ? (
             <div className="text-center py-16">
               <div className="bg-white rounded-lg p-12 shadow-sm border border-gray-300 max-w-md mx-auto">
                 <div className="text-6xl mb-4">💎</div>
@@ -250,12 +312,13 @@ export default function JewelryPage() {
                 className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer group border border-gray-200 hover:border-gray-400"
               >
               {/* Image Container */}
-              <div className="relative aspect-square overflow-hidden rounded-t-3xl">
+              <div className="relative w-full h-80 overflow-hidden rounded-t-3xl">
                 <Image
                   src={item.image}
                   alt={item.name}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
                 
                 {/* Wishlist Button */}
@@ -314,7 +377,7 @@ export default function JewelryPage() {
                 {/* Tags */}
                 <div className="flex gap-2 mb-4">
                   <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium border border-gray-300">
-                    {item.material.replace('-', ' ')}
+                    {item.material ? item.material.replace('-', ' ') : 'N/A'}
                   </span>
                   <span className="px-3 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-medium">
                     {item.subcategory}

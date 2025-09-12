@@ -5,12 +5,29 @@ import { Heart, Star, Minus, Plus, Share2, ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
 import { jewelryItems } from '../../data/jewelryData'
 import Footer from '../../components/Footer'
 
+interface Product {
+  _id: string
+  name: string
+  category: string
+  price: number
+  mainPrice?: number
+  image: string
+  images: string[]
+  description: string
+  material: string
+  features: string[]
+  rating: number
+  reviews: number
+  productDetails: any
+  stock: number
+  inStock: boolean
+}
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -19,10 +36,65 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState('7')
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
-  const [activeTab, setActiveTab] = useState('care')
+  const [activeTab, setActiveTab] = useState('details')
+  const [product, setProduct] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [reviewData, setReviewData] = useState({ rating: 5, comment: '', name: '' })
+  const [productReviews, setProductReviews] = useState({ reviews: [], totalReviews: 0, averageRating: 0 })
   
-  const productId = parseInt(params.id as string)
-  const product = jewelryItems.find(item => item.id === productId)
+  const productId = params.id as string
+  
+  useEffect(() => {
+    fetchProduct()
+    fetchProductReviews()
+  }, [productId])
+  
+  const fetchProductReviews = async () => {
+    try {
+      const response = await fetch(`/api/products/${productId}/reviews`)
+      if (response.ok) {
+        const data = await response.json()
+        setProductReviews(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch reviews:', error)
+    }
+  }
+  
+  const fetchProduct = async () => {
+    try {
+      // Try to fetch from database first
+      const response = await fetch(`/api/products/${productId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setProduct({
+          ...data.product,
+          id: data.product._id,
+          priceValue: data.product.price,
+          price: `₹${data.product.price.toLocaleString()}`
+        })
+      } else {
+        // Fallback to mock data
+        const mockProduct = jewelryItems.find(item => item.id === parseInt(productId))
+        setProduct(mockProduct)
+      }
+    } catch (error) {
+      // Fallback to mock data
+      const mockProduct = jewelryItems.find(item => item.id === parseInt(productId))
+      setProduct(mockProduct)
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20 bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+      </div>
+    )
+  }
   
   if (!product) {
     return (
@@ -38,7 +110,7 @@ export default function ProductDetailPage() {
   const images = [product.image, product.image, product.image, product.image]
   const sizes = ['5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9']
   
-  const originalPrice = product.priceValue * 1.2
+  const originalPrice = product.mainPrice || (product.priceValue * 1.2)
   const savings = originalPrice - product.priceValue
   
   const getMetalWeight = () => {
@@ -67,24 +139,32 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 bg-white backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl border border-gray-300">
           {/* Left - Images */}
           <div className="space-y-4">
-            <div className="relative aspect-square rounded-2xl overflow-hidden">
+            <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden">
               <Image
                 src={images[selectedImage]}
                 alt={product.name}
                 fill
-                className="object-cover"
+                className="object-cover object-center"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
               />
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4">
               {images.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative aspect-square rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index ? 'border-gray-800' : 'border-gray-300'
+                  className={`relative w-full h-20 sm:h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedImage === index ? 'border-gray-800 shadow-md' : 'border-gray-300 hover:border-gray-500'
                   }`}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <Image 
+                    src={img} 
+                    alt={`Product view ${index + 1}`} 
+                    fill 
+                    className="object-cover object-center" 
+                    sizes="100px"
+                  />
                 </button>
               ))}
             </div>
@@ -99,21 +179,30 @@ export default function ProductDetailPage() {
               <div className="flex items-center space-x-2 mt-4">
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={20} className={i < Math.floor(product.rating) ? "fill-yellow-400" : "text-gray-300"} />
+                    <Star key={i} size={20} className={i < Math.floor(productReviews.averageRating) ? "fill-yellow-400" : "text-gray-300"} />
                   ))}
                 </div>
-                <span className="text-gray-600">({product.reviews} reviews)</span>
-                <button className="text-gray-800 hover:underline ml-4">Write a review</button>
+                <span className="text-gray-600">({productReviews.totalReviews} reviews)</span>
+                <button 
+                  onClick={() => setShowReviewModal(true)}
+                  className="text-gray-800 hover:underline ml-4"
+                >
+                  Write a review
+                </button>
               </div>
             </div>
 
             {/* Price */}
             <div className="flex items-center space-x-4">
-              <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">${product.priceValue}</span>
-              <span className="text-lg sm:text-xl lg:text-2xl text-gray-400 line-through">${originalPrice.toFixed(0)}</span>
-              <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                Save ${savings.toFixed(0)}
-              </span>
+              <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">₹{product.priceValue.toLocaleString()}</span>
+              {product.mainPrice && (
+                <>
+                  <span className="text-lg sm:text-xl lg:text-2xl text-gray-400 line-through">₹{originalPrice.toLocaleString()}</span>
+                  <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    Save ₹{savings.toLocaleString()}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Ring Size */}
@@ -217,67 +306,27 @@ export default function ProductDetailPage() {
               <p className="text-gray-600 leading-relaxed">{product.description}</p>
             </div>
 
-            {/* Product Details */}
+            {/* Basic Product Info */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Product Details</h3>
+              <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-500">Material:</span>
-                  <span className="ml-2 font-medium capitalize">{product.material}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Color:</span>
-                  <span className="ml-2 font-medium capitalize">{product.color}</span>
-                </div>
                 <div>
                   <span className="text-gray-500">Category:</span>
                   <span className="ml-2 font-medium capitalize">{product.category}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Style:</span>
-                  <span className="ml-2 font-medium capitalize">{product.subcategory}</span>
+                  <span className="text-gray-500">Stock:</span>
+                  <span className="ml-2 font-medium">{product.stock || 'Available'}</span>
                 </div>
-                <div>
-                  <span className="text-gray-500">Metal Weight:</span>
-                  <span className="ml-2 font-medium">{getMetalWeight()}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Purity:</span>
-                  <span className="ml-2 font-medium">18K (75% Pure)</span>
-                </div>
-                {product.category === 'ring' && (
+                {!product.productDetails && (
                   <>
                     <div>
-                      <span className="text-gray-500">Band Width:</span>
-                      <span className="ml-2 font-medium">2.5mm</span>
+                      <span className="text-gray-500">Material:</span>
+                      <span className="ml-2 font-medium capitalize">{product.material}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Setting:</span>
-                      <span className="ml-2 font-medium">Prong Setting</span>
-                    </div>
-                  </>
-                )}
-                {product.category === 'necklace' && (
-                  <>
-                    <div>
-                      <span className="text-gray-500">Chain Length:</span>
-                      <span className="ml-2 font-medium">18 inches</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Chain Type:</span>
-                      <span className="ml-2 font-medium">Cable Chain</span>
-                    </div>
-                  </>
-                )}
-                {product.category === 'earrings' && (
-                  <>
-                    <div>
-                      <span className="text-gray-500">Closure:</span>
-                      <span className="ml-2 font-medium">Push Back</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Drop Length:</span>
-                      <span className="ml-2 font-medium">12mm</span>
+                      <span className="text-gray-500">Metal Weight:</span>
+                      <span className="ml-2 font-medium">{getMetalWeight()}</span>
                     </div>
                   </>
                 )}
@@ -288,22 +337,29 @@ export default function ProductDetailPage() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Key Features</h3>
               <ul className="space-y-2">
-                <li className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
-                  <span className="text-gray-700">18K {product.material} Band</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
-                  <span className="text-gray-700">Premium Quality {product.material}</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
-                  <span className="text-gray-700">Lifetime Warranty</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
-                  <span className="text-gray-700">Free Shipping & Returns</span>
-                </li>
+                {product.features && product.features.length > 0 ? (
+                  product.features.map((feature, index) => (
+                    <li key={index} className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))
+                ) : (
+                  <>
+                    <li className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
+                      <span className="text-gray-700">Premium Quality {product.material || 'Jewelry'}</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
+                      <span className="text-gray-700">Lifetime Warranty</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
+                      <span className="text-gray-700">Free Shipping & Returns</span>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
           </div>
@@ -313,6 +369,18 @@ export default function ProductDetailPage() {
         <div className="mt-16">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
+              {product.category === 'combo-set' && product.productDetails && (
+                <button 
+                  onClick={() => setActiveTab('details')}
+                  className={`border-b-2 py-2 px-1 text-sm font-medium ${
+                    activeTab === 'details' 
+                      ? 'border-gray-800 text-gray-800' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Product Details
+                </button>
+              )}
               <button 
                 onClick={() => setActiveTab('care')}
                 className={`border-b-2 py-2 px-1 text-sm font-medium ${
@@ -346,6 +414,59 @@ export default function ProductDetailPage() {
             </nav>
           </div>
           <div className="py-6">
+            {activeTab === 'details' && product.category === 'combo-set' && product.productDetails && (
+              <div className="prose max-w-none">
+                <h4 className="text-lg font-semibold mb-3">Complete Set Details</h4>
+                <div className="space-y-6">
+                  {/* Necklace Details */}
+                  {product.productDetails.necklace && (
+                    <div>
+                      <h5 className="font-semibold text-black mb-2">📿 Necklace Specifications</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700 pl-4">
+                        <div><strong>Material:</strong> {product.productDetails.necklace.material}</div>
+                        <div><strong>Color:</strong> {product.productDetails.necklace.color || 'N/A'}</div>
+                        <div><strong>Weight:</strong> {product.productDetails.necklace.weight || 'N/A'}</div>
+                        <div><strong>Purity:</strong> {product.productDetails.necklace.purity || 'N/A'}</div>
+                        <div><strong>Style:</strong> {product.productDetails.necklace.style || 'N/A'}</div>
+                        <div><strong>Chain Type:</strong> {product.productDetails.necklace.chainType || 'N/A'}</div>
+                        <div><strong>Chain Length:</strong> {product.productDetails.necklace.chainLength || 'N/A'}</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Bengals Details */}
+                  {product.productDetails.bengals && (
+                    <div>
+                      <h5 className="font-semibold text-black mb-2">⚡ Bengals Specifications</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700 pl-4">
+                        <div><strong>Material:</strong> {product.productDetails.bengals.material}</div>
+                        <div><strong>Color:</strong> {product.productDetails.bengals.color || 'N/A'}</div>
+                        <div><strong>Weight:</strong> {product.productDetails.bengals.weight || 'N/A'}</div>
+                        <div><strong>Purity:</strong> {product.productDetails.bengals.purity || 'N/A'}</div>
+                        <div><strong>Style:</strong> {product.productDetails.bengals.style || 'N/A'}</div>
+                        <div><strong>Size:</strong> {product.productDetails.bengals.size || 'N/A'}</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Earrings Details */}
+                  {product.productDetails.earrings && (
+                    <div>
+                      <h5 className="font-semibold text-black mb-2">💍 Earrings Specifications</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700 pl-4">
+                        <div><strong>Material:</strong> {product.productDetails.earrings.material}</div>
+                        <div><strong>Color:</strong> {product.productDetails.earrings.color || 'N/A'}</div>
+                        <div><strong>Weight:</strong> {product.productDetails.earrings.weight || 'N/A'}</div>
+                        <div><strong>Purity:</strong> {product.productDetails.earrings.purity || 'N/A'}</div>
+                        <div><strong>Style:</strong> {product.productDetails.earrings.style || 'N/A'}</div>
+                        <div><strong>Closure:</strong> {product.productDetails.earrings.closure || 'N/A'}</div>
+                        <div><strong>Drop Length:</strong> {product.productDetails.earrings.dropLength || 'N/A'}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             {activeTab === 'care' && (
               <div className="prose max-w-none">
                 <h4 className="text-lg font-semibold mb-3">Care Instructions</h4>
@@ -402,22 +523,102 @@ export default function ProductDetailPage() {
                       <li>• Cold weather can make fingers smaller</li>
                     </ul>
                   </div>
-                  <div>
-                    <h5 className="font-medium mb-2">Size Chart</h5>
-                    <ul className="space-y-1 text-sm">
-                      <li>• Size 5: 15.7mm diameter</li>
-                      <li>• Size 6: 16.5mm diameter</li>
-                      <li>• Size 7: 17.3mm diameter</li>
-                      <li>• Size 8: 18.2mm diameter</li>
-                      <li>• Size 9: 19.0mm diameter</li>
-                    </ul>
-                  </div>
+
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Write a Review</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                <input
+                  type="text"
+                  value={reviewData.name}
+                  onChange={(e) => setReviewData({...reviewData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800"
+                  placeholder="Enter your name"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                <div className="flex space-x-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setReviewData({...reviewData, rating: star})}
+                      className={`text-2xl ${star <= reviewData.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                <textarea
+                  value={reviewData.comment}
+                  onChange={(e) => setReviewData({...reviewData, comment: e.target.value})}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800"
+                  placeholder="Share your experience with this product..."
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/reviews', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        productId: product.id,
+                        productName: product.name,
+                        userName: reviewData.name,
+                        rating: reviewData.rating,
+                        comment: reviewData.comment
+                      })
+                    })
+                    if (response.ok) {
+                      alert('Review submitted successfully!')
+                      fetchProductReviews() // Refresh reviews
+                    }
+                  } catch (error) {
+                    alert('Failed to submit review')
+                  }
+                  setShowReviewModal(false)
+                  setReviewData({ rating: 5, comment: '', name: '' })
+                }}
+                className="flex-1 bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Submit Review
+              </button>
+              <button
+                onClick={() => {
+                  setShowReviewModal(false)
+                  setReviewData({ rating: 5, comment: '', name: '' })
+                }}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Footer />
     </div>
   )

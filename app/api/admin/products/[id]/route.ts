@@ -42,22 +42,91 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('PUT request received for ID:', params.id)
+    const token = request.cookies.get('token')?.value
+
+    if (!token) {
+      return NextResponse.json({ error: 'No token found' }, { status: 401 })
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any
     
-    const body = await request.json()
-    console.log('JSON body received:', body)
+    if (decoded.role !== 'admin' || decoded.email !== 'adminjwelery@gmail.com') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    const formData = await request.formData()
     
-    const updateData = {
-      name: body.name,
-      category: body.category,
-      price: parseFloat(body.discountedPrice) || 0,
-      description: body.description,
-      material: body.material,
-      stock: parseInt(body.stock) || 0,
+    // Parse product details
+    const productDetailsStr = formData.get('productDetails') as string
+    let productDetails = {}
+    if (productDetailsStr) {
+      try {
+        productDetails = JSON.parse(productDetailsStr)
+      } catch (e) {
+        console.error('Error parsing productDetails:', e)
+      }
+    }
+    
+    // Parse features
+    const features = []
+    for (let i = 1; i <= 4; i++) {
+      const feature = formData.get(`feature${i}`) as string
+      if (feature && feature.trim()) {
+        features.push(feature.trim())
+      }
+    }
+    
+    // Handle image updates
+    const timestamp = Date.now()
+    const updateData: any = {
+      name: formData.get('name') as string,
+      category: formData.get('category') as string,
+      price: parseFloat(formData.get('discountedPrice') as string) || 0,
+      mainPrice: parseFloat(formData.get('mainPrice') as string) || 0,
+      description: formData.get('description') as string,
+      stock: parseInt(formData.get('stock') as string) || 0,
+      productDetails,
+      features,
+      inStock: parseInt(formData.get('stock') as string) > 0,
       updatedAt: new Date()
     }
     
-    console.log('Update data:', updateData)
+    // Update main image if new one uploaded
+    const mainImageFile = formData.get('mainImage') as File
+    if (mainImageFile && mainImageFile.size > 0) {
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', mainImageFile)
+      const uploadResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/upload`, {
+        method: 'POST',
+        body: uploadFormData
+      })
+      if (uploadResponse.ok) {
+        const uploadResult = await uploadResponse.json()
+        updateData.mainImage = uploadResult.url
+        updateData.image = uploadResult.url
+      }
+    }
+    
+    // Update additional images if new ones uploaded
+    const newImages = []
+    for (let i = 1; i <= 4; i++) {
+      const imageFile = formData.get(`image${i}`) as File
+      if (imageFile && imageFile.size > 0) {
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', imageFile)
+        const uploadResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/upload`, {
+          method: 'POST',
+          body: uploadFormData
+        })
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json()
+          newImages.push(uploadResult.url)
+        }
+      }
+    }
+    if (newImages.length > 0) {
+      updateData.images = newImages
+    }
 
     const client = await clientPromise
     const db = client.db('jewelry_store')
@@ -67,8 +136,6 @@ export async function PUT(
       { _id: new ObjectId(params.id) },
       { $set: updateData }
     )
-    
-    console.log('Update result:', result)
     
     return NextResponse.json({ message: 'Product updated successfully' })
 
