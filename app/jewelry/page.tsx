@@ -64,7 +64,7 @@ export default function JewelryPage() {
   }
 
   const allItems = [
-    ...(selectedCategory === 'all' ? [] : jewelryItems.filter(item => selectedCategory === 'all' || item.category === selectedCategory)),
+    ...(selectedCategory === 'all' ? jewelryItems : jewelryItems.filter(item => item.category !== 'necklace' && (selectedCategory === 'all' || item.category === selectedCategory))),
     ...products.map(p => ({
       id: p._id,
       name: p.name,

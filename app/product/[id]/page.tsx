@@ -369,7 +369,7 @@ export default function ProductDetailPage() {
         <div className="mt-8 sm:mt-12 lg:mt-16 px-4 sm:px-0">
           {/* Mobile/Tablet Accordion */}
           <div className="md:hidden space-y-2">
-            {product.category === 'combo-set' && product.productDetails && (
+            {((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace)) && (
               <div className="border border-gray-200 rounded-lg">
                 <button
                   onClick={() => setActiveTab(activeTab === 'details' ? '' : 'details')}
@@ -381,7 +381,7 @@ export default function ProductDetailPage() {
                 {activeTab === 'details' && (
                   <div className="px-4 pb-4 border-t border-gray-200">
                     <div className="prose max-w-none">
-                      <h4 className="text-base sm:text-lg font-semibold mb-3">Complete Set Details</h4>
+                      <h4 className="text-base sm:text-lg font-semibold mb-3">{product.category === 'combo-set' ? 'Complete Set Details' : 'Necklace Details'}</h4>
                       <div className="space-y-4 sm:space-y-6">
                         {product.productDetails.necklace && (
                           <div>
@@ -511,15 +511,47 @@ export default function ProductDetailPage() {
                   <div className="prose max-w-none">
                     <h4 className="text-base sm:text-lg font-semibold mb-3">Size Guide</h4>
                     <div className="space-y-4 text-gray-700">
-                      <div>
-                        <h5 className="font-medium mb-2">Ring Sizing Tips</h5>
-                        <ul className="space-y-1">
-                          <li>• Measure your finger at the end of the day when it's largest</li>
-                          <li>• The ring should fit snugly but slide over your knuckle easily</li>
-                          <li>• Consider the width of the band - wider bands fit tighter</li>
-                          <li>• Cold weather can make fingers smaller</li>
-                        </ul>
-                      </div>
+                      {product.category === 'combo-set' ? (
+                        <>
+                          <div>
+                            <h5 className="font-medium mb-2 text-sm sm:text-base">📿 Necklace Sizing</h5>
+                            <ul className="space-y-1 text-xs sm:text-sm">
+                              <li>• 16" - Choker length, sits at base of neck</li>
+                              <li>• 18" - Princess length, most popular choice</li>
+                              <li>• 20" - Matinee length, sits below collarbone</li>
+                              <li>• 24" - Opera length, sits at breastbone</li>
+                            </ul>
+                          </div>
+                          <div>
+                            <h5 className="font-medium mb-2 text-sm sm:text-base">⚡ Bengals Sizing</h5>
+                            <ul className="space-y-1 text-xs sm:text-sm">
+                              <li>• Small: 2.2" - 2.4" diameter (5.5-6 cm)</li>
+                              <li>• Medium: 2.4" - 2.6" diameter (6-6.5 cm)</li>
+                              <li>• Large: 2.6" - 2.8" diameter (6.5-7 cm)</li>
+                              <li>• Measure wrist at widest point for best fit</li>
+                            </ul>
+                          </div>
+                          <div>
+                            <h5 className="font-medium mb-2 text-sm sm:text-base">💍 Earrings Sizing</h5>
+                            <ul className="space-y-1 text-xs sm:text-sm">
+                              <li>• Stud: 4-8mm diameter for everyday wear</li>
+                              <li>• Drop: 1-3" length for elegant occasions</li>
+                              <li>• Hoop: 15-25mm diameter for versatile style</li>
+                              <li>• Consider face shape and hair length</li>
+                            </ul>
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <h5 className="font-medium mb-2 text-sm sm:text-base">Ring Sizing Tips</h5>
+                          <ul className="space-y-1 text-xs sm:text-sm">
+                            <li>• Measure your finger at the end of the day when it's largest</li>
+                            <li>• The ring should fit snugly but slide over your knuckle easily</li>
+                            <li>• Consider the width of the band - wider bands fit tighter</li>
+                            <li>• Cold weather can make fingers smaller</li>
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -530,7 +562,7 @@ export default function ProductDetailPage() {
           {/* Desktop/Tablet Tabs */}
           <div className="hidden md:block border-b border-gray-200">
             <nav className="-mb-px flex flex-wrap gap-4 md:gap-6 lg:gap-8">
-              {product.category === 'combo-set' && product.productDetails && (
+              {((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace)) && (
                 <button 
                   onClick={() => setActiveTab('details')}
                   className={`border-b-2 py-2 px-1 text-sm font-medium ${
@@ -574,10 +606,10 @@ export default function ProductDetailPage() {
               </button>
             </nav>
           </div>
-          <div className="py-4 sm:py-6 px-4 sm:px-0">
-            {activeTab === 'details' && product.category === 'combo-set' && product.productDetails && (
+          <div className="hidden md:block py-4 sm:py-6 px-4 sm:px-0">
+            {activeTab === 'details' && ((product.category === 'combo-set' && product.productDetails) || (product.category === 'necklace' && product.productDetails?.necklace)) && (
               <div className="prose max-w-none">
-                <h4 className="text-base sm:text-lg font-semibold mb-3">Complete Set Details</h4>
+                <h4 className="text-base sm:text-lg font-semibold mb-3">{product.category === 'combo-set' ? 'Complete Set Details' : 'Necklace Details'}</h4>
                 <div className="space-y-4 sm:space-y-6">
                   {/* Necklace Details */}
                   {product.productDetails.necklace && (
@@ -675,127 +707,47 @@ export default function ProductDetailPage() {
               <div className="prose max-w-none">
                 <h4 className="text-lg font-semibold mb-3">Size Guide</h4>
                 <div className="space-y-4 text-gray-700">
-                  <div>
-                    <h5 className="font-medium mb-2">Ring Sizing Tips</h5>
-                    <ul className="space-y-1">
-                      <li>• Measure your finger at the end of the day when it's largest</li>
-                      <li>• The ring should fit snugly but slide over your knuckle easily</li>
-                      <li>• Consider the width of the band - wider bands fit tighter</li>
-                      <li>• Cold weather can make fingers smaller</li>
-                    </ul>
-                  </div>
-
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Desktop Content */}
-          <div className="hidden md:block py-6">
-            {activeTab === 'details' && product.category === 'combo-set' && product.productDetails && (
-              <div className="prose max-w-none">
-                <h4 className="text-lg font-semibold mb-3">Complete Set Details</h4>
-                <div className="space-y-6">
-                  {product.productDetails.necklace && (
-                    <div>
-                      <h5 className="font-semibold text-black mb-2">📿 Necklace Specifications</h5>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700 pl-4">
-                        <div><strong>Material:</strong> {product.productDetails.necklace.material}</div>
-                        <div><strong>Color:</strong> {product.productDetails.necklace.color || 'N/A'}</div>
-                        <div><strong>Weight:</strong> {product.productDetails.necklace.weight || 'N/A'}</div>
-                        <div><strong>Purity:</strong> {product.productDetails.necklace.purity || 'N/A'}</div>
-                        <div><strong>Style:</strong> {product.productDetails.necklace.style || 'N/A'}</div>
-                        <div><strong>Chain Type:</strong> {product.productDetails.necklace.chainType || 'N/A'}</div>
-                        <div><strong>Chain Length:</strong> {product.productDetails.necklace.chainLength || 'N/A'}</div>
+                  {product.category === 'combo-set' ? (
+                    <>
+                      <div>
+                        <h5 className="font-medium mb-2">📿 Necklace Sizing</h5>
+                        <ul className="space-y-1">
+                          <li>• 16" - Choker length, sits at base of neck</li>
+                          <li>• 18" - Princess length, most popular choice</li>
+                          <li>• 20" - Matinee length, sits below collarbone</li>
+                          <li>• 24" - Opera length, sits at breastbone</li>
+                        </ul>
                       </div>
+                      <div>
+                        <h5 className="font-medium mb-2">⚡ Bengals Sizing</h5>
+                        <ul className="space-y-1">
+                          <li>• Small: 2.2" - 2.4" diameter (5.5-6 cm)</li>
+                          <li>• Medium: 2.4" - 2.6" diameter (6-6.5 cm)</li>
+                          <li>• Large: 2.6" - 2.8" diameter (6.5-7 cm)</li>
+                          <li>• Measure wrist at widest point for best fit</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium mb-2">💍 Earrings Sizing</h5>
+                        <ul className="space-y-1">
+                          <li>• Stud: 4-8mm diameter for everyday wear</li>
+                          <li>• Drop: 1-3" length for elegant occasions</li>
+                          <li>• Hoop: 15-25mm diameter for versatile style</li>
+                          <li>• Consider face shape and hair length</li>
+                        </ul>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <h5 className="font-medium mb-2">Ring Sizing Tips</h5>
+                      <ul className="space-y-1">
+                        <li>• Measure your finger at the end of the day when it's largest</li>
+                        <li>• The ring should fit snugly but slide over your knuckle easily</li>
+                        <li>• Consider the width of the band - wider bands fit tighter</li>
+                        <li>• Cold weather can make fingers smaller</li>
+                      </ul>
                     </div>
                   )}
-                  {product.productDetails.bengals && (
-                    <div>
-                      <h5 className="font-semibold text-black mb-2">⚡ Bengals Specifications</h5>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700 pl-4">
-                        <div><strong>Material:</strong> {product.productDetails.bengals.material}</div>
-                        <div><strong>Color:</strong> {product.productDetails.bengals.color || 'N/A'}</div>
-                        <div><strong>Weight:</strong> {product.productDetails.bengals.weight || 'N/A'}</div>
-                        <div><strong>Purity:</strong> {product.productDetails.bengals.purity || 'N/A'}</div>
-                        <div><strong>Style:</strong> {product.productDetails.bengals.style || 'N/A'}</div>
-                        <div><strong>Size:</strong> {product.productDetails.bengals.size || 'N/A'}</div>
-                      </div>
-                    </div>
-                  )}
-                  {product.productDetails.earrings && (
-                    <div>
-                      <h5 className="font-semibold text-black mb-2">💍 Earrings Specifications</h5>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700 pl-4">
-                        <div><strong>Material:</strong> {product.productDetails.earrings.material}</div>
-                        <div><strong>Color:</strong> {product.productDetails.earrings.color || 'N/A'}</div>
-                        <div><strong>Weight:</strong> {product.productDetails.earrings.weight || 'N/A'}</div>
-                        <div><strong>Purity:</strong> {product.productDetails.earrings.purity || 'N/A'}</div>
-                        <div><strong>Style:</strong> {product.productDetails.earrings.style || 'N/A'}</div>
-                        <div><strong>Closure:</strong> {product.productDetails.earrings.closure || 'N/A'}</div>
-                        <div><strong>Drop Length:</strong> {product.productDetails.earrings.dropLength || 'N/A'}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            {activeTab === 'care' && (
-              <div className="prose max-w-none">
-                <h4 className="text-lg font-semibold mb-3">Care Instructions</h4>
-                <ul className="space-y-2 text-gray-700">
-                  <li>• Clean with a soft, lint-free cloth</li>
-                  <li>• Store in a jewelry box or soft pouch</li>
-                  <li>• Avoid contact with chemicals, perfumes, and lotions</li>
-                  <li>• Remove before swimming, showering, or exercising</li>
-                  <li>• Professional cleaning recommended every 6 months</li>
-                </ul>
-              </div>
-            )}
-            {activeTab === 'shipping' && (
-              <div className="prose max-w-none">
-                <h4 className="text-lg font-semibold mb-3">Shipping & Returns</h4>
-                <div className="space-y-4 text-gray-700">
-                  <div>
-                    <h5 className="font-medium mb-2">Free Shipping</h5>
-                    <ul className="space-y-1">
-                      <li>• Free standard shipping on orders over $500</li>
-                      <li>• Express shipping available for $25</li>
-                      <li>• International shipping rates vary by location</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h5 className="font-medium mb-2">Delivery Time</h5>
-                    <ul className="space-y-1">
-                      <li>• Standard: 5-7 business days</li>
-                      <li>• Express: 2-3 business days</li>
-                      <li>• International: 10-14 business days</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h5 className="font-medium mb-2">Returns</h5>
-                    <ul className="space-y-1">
-                      <li>• 30-day return policy</li>
-                      <li>• Items must be in original condition</li>
-                      <li>• Free return shipping on defective items</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-            {activeTab === 'size' && (
-              <div className="prose max-w-none">
-                <h4 className="text-lg font-semibold mb-3">Size Guide</h4>
-                <div className="space-y-4 text-gray-700">
-                  <div>
-                    <h5 className="font-medium mb-2">Ring Sizing Tips</h5>
-                    <ul className="space-y-1">
-                      <li>• Measure your finger at the end of the day when it's largest</li>
-                      <li>• The ring should fit snugly but slide over your knuckle easily</li>
-                      <li>• Consider the width of the band - wider bands fit tighter</li>
-                      <li>• Cold weather can make fingers smaller</li>
-                    </ul>
-                  </div>
                 </div>
               </div>
             )}
