@@ -541,6 +541,18 @@ export default function ProductDetailPage() {
                             </ul>
                           </div>
                         </>
+                      ) : product.category === 'necklace' ? (
+                        <div>
+                          <h5 className="font-medium mb-2 text-sm sm:text-base">📿 Necklace Sizing Tips</h5>
+                          <ul className="space-y-1 text-xs sm:text-sm">
+                            <li>• 16" - Choker length, sits at base of neck</li>
+                            <li>• 18" - Princess length, most popular choice</li>
+                            <li>• 20" - Matinee length, sits below collarbone</li>
+                            <li>• 24" - Opera length, sits at breastbone</li>
+                            <li>• Consider your neckline and personal style preference</li>
+                            <li>• Layer different lengths for a trendy look</li>
+                          </ul>
+                        </div>
                       ) : (
                         <div>
                           <h5 className="font-medium mb-2 text-sm sm:text-base">Ring Sizing Tips</h5>
@@ -737,6 +749,18 @@ export default function ProductDetailPage() {
                         </ul>
                       </div>
                     </>
+                  ) : product.category === 'necklace' ? (
+                    <div>
+                      <h5 className="font-medium mb-2">📿 Necklace Sizing Tips</h5>
+                      <ul className="space-y-1">
+                        <li>• 16" - Choker length, sits at base of neck</li>
+                        <li>• 18" - Princess length, most popular choice</li>
+                        <li>• 20" - Matinee length, sits below collarbone</li>
+                        <li>• 24" - Opera length, sits at breastbone</li>
+                        <li>• Consider your neckline and personal style preference</li>
+                        <li>• Layer different lengths for a trendy look</li>
+                      </ul>
+                    </div>
                   ) : (
                     <div>
                       <h5 className="font-medium mb-2">Ring Sizing Tips</h5>

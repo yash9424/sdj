@@ -30,10 +30,12 @@ export default function ComboSetPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [stockFilter, setStockFilter] = useState('all')
+  const [priceFilter, setPriceFilter] = useState('all')
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectAll, setSelectAll] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const productsPerPage = 10
+  const productsPerPage = 15
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean
     title: string
@@ -120,10 +122,21 @@ export default function ComboSetPage() {
     })
   }
 
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.material.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStock = stockFilter === 'all' || 
+      (stockFilter === 'in-stock' && product.inStock) ||
+      (stockFilter === 'out-of-stock' && !product.inStock)
+    
+    const price = product.price || 0
+    const matchesPrice = priceFilter === 'all' ||
+      (priceFilter === 'under-1k' && price < 1000) ||
+      (priceFilter === '1k-3k' && price >= 1000 && price <= 3000) ||
+      (priceFilter === '3k-5k' && price > 3000 && price <= 5000) ||
+      (priceFilter === 'above-5k' && price > 5000)
+    
+    return matchesSearch && matchesStock && matchesPrice
+  })
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
   const startIndex = (currentPage - 1) * productsPerPage
@@ -172,6 +185,26 @@ export default function ComboSetPage() {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
+        <select
+          value={stockFilter}
+          onChange={(e) => setStockFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="all">All Status</option>
+          <option value="in-stock">In Stock</option>
+          <option value="out-of-stock">Out of Stock</option>
+        </select>
+        <select
+          value={priceFilter}
+          onChange={(e) => setPriceFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="all">All Prices</option>
+          <option value="under-1k">Under ₹1,000</option>
+          <option value="1k-3k">₹1,000 - ₹3,000</option>
+          <option value="3k-5k">₹3,000 - ₹5,000</option>
+          <option value="above-5k">Above ₹5,000</option>
+        </select>
         {selectedProducts.length > 0 && (
           <button 
             onClick={deleteSelectedProducts}
@@ -198,7 +231,6 @@ export default function ComboSetPage() {
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Combo Set</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Price</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Material</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Stock</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
@@ -236,7 +268,6 @@ export default function ComboSetPage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 capitalize">{product.material}</td>
                   <td className="px-6 py-4 text-gray-600">{product.stock || 0}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${

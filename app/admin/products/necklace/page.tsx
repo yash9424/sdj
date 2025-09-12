@@ -14,7 +14,18 @@ interface Product {
   mainImage?: string
   images?: string[]
   description: string
-  material: string
+  material?: string
+  productDetails?: {
+    necklace?: {
+      material?: string
+      color?: string
+      style?: string
+      weight?: string
+      purity?: string
+      chainType?: string
+      chainLength?: string
+    }
+  }
   stock?: number
   features?: string[]
   inStock: boolean
@@ -25,6 +36,9 @@ export default function NecklacePage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [stockFilter, setStockFilter] = useState('all')
+  const [priceFilter, setPriceFilter] = useState('all')
+  const [materialFilter, setMaterialFilter] = useState('all')
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectAll, setSelectAll] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -99,10 +113,24 @@ export default function NecklacePage() {
     }
   }
 
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.material?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStock = stockFilter === 'all' || 
+      (stockFilter === 'in-stock' && product.inStock) ||
+      (stockFilter === 'out-of-stock' && !product.inStock)
+    
+    const price = product.price || 0
+    const matchesPrice = priceFilter === 'all' ||
+      (priceFilter === 'under-1k' && price < 1000) ||
+      (priceFilter === '1k-3k' && price >= 1000 && price <= 3000) ||
+      (priceFilter === '3k-5k' && price > 3000 && price <= 5000) ||
+      (priceFilter === 'above-5k' && price > 5000)
+    
+    const material = product.productDetails?.necklace?.material || product.material || ''
+    const matchesMaterial = materialFilter === 'all' || material.toLowerCase() === materialFilter.toLowerCase()
+    
+    return matchesSearch && matchesStock && matchesPrice && matchesMaterial
+  })
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
   const startIndex = (currentPage - 1) * productsPerPage
@@ -151,6 +179,39 @@ export default function NecklacePage() {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+        <select
+          value={stockFilter}
+          onChange={(e) => setStockFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="all">All Status</option>
+          <option value="in-stock">In Stock</option>
+          <option value="out-of-stock">Out of Stock</option>
+        </select>
+        <select
+          value={priceFilter}
+          onChange={(e) => setPriceFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="all">All Prices</option>
+          <option value="under-1k">Under ₹1,000</option>
+          <option value="1k-3k">₹1,000 - ₹3,000</option>
+          <option value="3k-5k">₹3,000 - ₹5,000</option>
+          <option value="above-5k">Above ₹5,000</option>
+        </select>
+        <select
+          value={materialFilter}
+          onChange={(e) => setMaterialFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="all">All Materials</option>
+          <option value="gold">Gold</option>
+          <option value="silver">Silver</option>
+          <option value="diamond">Diamond</option>
+          <option value="platinum">Platinum</option>
+          <option value="rose-gold">Rose Gold</option>
+          <option value="white-gold">White Gold</option>
+        </select>
         {selectedProducts.length > 0 && (
           <button 
             onClick={deleteSelectedProducts}
@@ -215,7 +276,7 @@ export default function NecklacePage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 capitalize">{product.material}</td>
+                  <td className="px-6 py-4 text-gray-600 capitalize">{product.productDetails?.necklace?.material || product.material || 'N/A'}</td>
                   <td className="px-6 py-4 text-gray-600">{product.stock || 0}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
