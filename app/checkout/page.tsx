@@ -1,27 +1,44 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CreditCard, Lock, ArrowLeft, Smartphone, Wallet } from 'lucide-react'
+import { CreditCard, Lock, ArrowLeft, Smartphone, Wallet, Plus, Minus, Truck } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import Footer from '../components/Footer'
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice } = useCart()
+  const { items, getTotalPrice, updateQuantity } = useCart()
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
-    firstName: '',
-    lastName: '',
+    mobile: '',
+    secondMobile: '',
     address: '',
+    state: '',
     city: '',
-    zipCode: '',
+    pincode: '',
     cardNumber: '',
     expiryDate: '',
     cvv: '',
     cardName: ''
   })
-  const [paymentMethod, setPaymentMethod] = useState('card')
+
+  // Auto-fetch user profile data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.username || '',
+        email: user.email || '',
+        mobile: user.mobile || ''
+      }))
+    }
+  }, [user])
+  const [paymentMethod, setPaymentMethod] = useState('cod')
   const [notification, setNotification] = useState<{
     show: boolean
     type: 'success' | 'error'
@@ -29,23 +46,69 @@ export default function CheckoutPage() {
   }>({ show: false, type: 'success', message: '' })
 
   const subtotal = getTotalPrice()
-  const shipping = subtotal > 1000 ? 0 : 50
-  const tax = subtotal * 0.08
+  const shipping = 99
+  const tax = subtotal * 0.18
   const total = subtotal + shipping + tax
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Payment processing logic would go here
-    setNotification({
-      show: true,
-      type: 'success',
-      message: 'Payment processed successfully!'
-    })
-    setTimeout(() => setNotification({ show: false, type: 'success', message: '' }), 3000)
+    
+    try {
+      const orderData = {
+        name: formData.name,
+        email: formData.email,
+        mobile: formData.mobile,
+        secondMobile: formData.secondMobile,
+        address: formData.address,
+        state: formData.state,
+        city: formData.city,
+        pincode: formData.pincode,
+        items: items,
+        subtotal: subtotal,
+        shipping: shipping,
+        tax: tax,
+        total: total,
+        paymentMethod: paymentMethod
+      }
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderData)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setNotification({
+          show: true,
+          type: 'success',
+          message: `Order placed successfully! Order ID: ${result.orderId}`
+        })
+        // Clear cart after successful order
+        setTimeout(() => {
+          window.location.href = '/jewelry'
+        }, 2000)
+      } else {
+        setNotification({
+          show: true,
+          type: 'error',
+          message: result.message || 'Failed to place order'
+        })
+      }
+    } catch (error) {
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Failed to place order. Please try again.'
+      })
+    }
   }
 
   return (
@@ -67,53 +130,70 @@ export default function CheckoutPage() {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Contact Information */}
+              {/* User Information */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Contact Information</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Personal Information</h3>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none mb-4"
+                  required
+                />
                 <input
                   type="email"
                   name="email"
-                  placeholder="Email address"
+                  placeholder="Email Address"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none mb-4"
                   required
                 />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input
+                    type="tel"
+                    name="mobile"
+                    placeholder="Mobile Number"
+                    value={formData.mobile}
+                    onChange={handleInputChange}
+                    className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
+                    required
+                  />
+                  <input
+                    type="tel"
+                    name="secondMobile"
+                    placeholder="Second Mobile (Optional)"
+                    value={formData.secondMobile}
+                    onChange={handleInputChange}
+                    className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
+                  />
+                </div>
               </div>
 
               {/* Shipping Address */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Shipping Address</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    name="firstName"
-                    placeholder="First name"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="lastName"
-                    placeholder="Last name"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
-                    required
-                  />
-                </div>
                 <input
                   type="text"
                   name="address"
-                  placeholder="Address"
+                  placeholder="Complete Address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none mt-4"
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none mb-4"
                   required
                 />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="state"
+                    placeholder="State"
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
+                    required
+                  />
                   <input
                     type="text"
                     name="city"
@@ -123,16 +203,16 @@ export default function CheckoutPage() {
                     className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
                     required
                   />
-                  <input
-                    type="text"
-                    name="zipCode"
-                    placeholder="ZIP code"
-                    value={formData.zipCode}
-                    onChange={handleInputChange}
-                    className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
-                    required
-                  />
                 </div>
+                <input
+                  type="text"
+                  name="pincode"
+                  placeholder="Pincode"
+                  value={formData.pincode}
+                  onChange={handleInputChange}
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
+                  required
+                />
               </div>
 
               {/* Payment Method Selection */}
@@ -141,114 +221,41 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-3 rounded-lg border text-center flex items-center justify-center space-x-2 ${paymentMethod === 'card' ? 'border-gray-800 bg-gray-100' : 'border-gray-300'}`}
+                    onClick={() => setPaymentMethod('cod')}
+                    className={`p-4 rounded-lg border text-center flex items-center justify-center space-x-2 ${paymentMethod === 'cod' ? 'border-gray-800 bg-gray-100' : 'border-gray-300'}`}
                   >
-                    <CreditCard size={20} />
-                    <span>Credit Card</span>
+                    <Truck size={20} />
+                    <span>Cash on Delivery</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod('paypal')}
-                    className={`p-3 rounded-lg border text-center flex items-center justify-center space-x-2 ${paymentMethod === 'paypal' ? 'border-gray-800 bg-gray-100' : 'border-gray-300'}`}
-                  >
-                    <Wallet size={20} />
-                    <span>PayPal</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('apple')}
-                    className={`p-3 rounded-lg border text-center flex items-center justify-center space-x-2 ${paymentMethod === 'apple' ? 'border-gray-800 bg-gray-100' : 'border-gray-300'}`}
+                    onClick={() => setPaymentMethod('phonepe')}
+                    className={`p-4 rounded-lg border text-center flex items-center justify-center space-x-2 ${paymentMethod === 'phonepe' ? 'border-gray-800 bg-gray-100' : 'border-gray-300'}`}
                   >
                     <Smartphone size={20} />
-                    <span>Apple Pay</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('google')}
-                    className={`p-3 rounded-lg border text-center flex items-center justify-center space-x-2 ${paymentMethod === 'google' ? 'border-gray-800 bg-gray-100' : 'border-gray-300'}`}
-                  >
-                    <Wallet size={20} />
-                    <span>Google Pay</span>
+                    <span>PhonePe Online</span>
                   </button>
                 </div>
               </div>
 
               {/* Payment Information */}
-              {paymentMethod === 'card' && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                    <CreditCard size={20} className="mr-2" />
-                    Card Information
-                  </h3>
-                  <input
-                    type="text"
-                    name="cardNumber"
-                    placeholder="Card number"
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                    className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="cardName"
-                    placeholder="Name on card"
-                    value={formData.cardName}
-                    onChange={handleInputChange}
-                    className="w-full p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none mt-4"
-                    required
-                  />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                    <input
-                      type="text"
-                      name="expiryDate"
-                      placeholder="MM/YY"
-                      value={formData.expiryDate}
-                      onChange={handleInputChange}
-                      className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
-                      required
-                    />
-                    <input
-                      type="text"
-                      name="cvv"
-                      placeholder="CVV"
-                      value={formData.cvv}
-                      onChange={handleInputChange}
-                      className="p-3 rounded-lg border border-gray-300 focus:border-gray-800 focus:outline-none"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              {paymentMethod === 'paypal' && (
+              {paymentMethod === 'cod' && (
                 <div className="text-center p-8 bg-gray-100 rounded-lg">
-                  <p className="text-gray-600 mb-4">You will be redirected to PayPal to complete your payment</p>
+                  <p className="text-gray-600 mb-4">Pay when your order is delivered to your doorstep</p>
                   <div className="flex justify-center mb-2">
-                    <Wallet size={48} className="text-gray-800" />
+                    <Truck size={48} className="text-gray-800" />
                   </div>
-                  <p className="text-sm text-gray-500">Secure PayPal checkout</p>
+                  <p className="text-sm text-gray-500">No advance payment required</p>
                 </div>
               )}
 
-              {paymentMethod === 'apple' && (
+              {paymentMethod === 'phonepe' && (
                 <div className="text-center p-8 bg-gray-100 rounded-lg">
-                  <p className="text-gray-600 mb-4">Use Touch ID or Face ID to pay with Apple Pay</p>
+                  <p className="text-gray-600 mb-4">You will be redirected to PhonePe to complete your payment</p>
                   <div className="flex justify-center mb-2">
                     <Smartphone size={48} className="text-gray-800" />
                   </div>
-                  <p className="text-sm text-gray-500">Quick and secure payment</p>
-                </div>
-              )}
-
-              {paymentMethod === 'google' && (
-                <div className="text-center p-8 bg-gray-100 rounded-lg">
-                  <p className="text-gray-600 mb-4">Pay quickly with your Google account</p>
-                  <div className="flex justify-center mb-2">
-                    <Wallet size={48} className="text-gray-800" />
-                  </div>
-                  <p className="text-sm text-gray-500">Fast Google Pay checkout</p>
+                  <p className="text-sm text-gray-500">Secure PhonePe online payment</p>
                 </div>
               )}
 
@@ -258,10 +265,7 @@ export default function CheckoutPage() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 rounded-xl font-semibold text-lg shadow-lg mt-6"
               >
-                {paymentMethod === 'card' ? 'Complete Payment' : 
-                 paymentMethod === 'paypal' ? 'Continue with PayPal' :
-                 paymentMethod === 'apple' ? 'Pay with Apple Pay' :
-                 'Pay with Google Pay'}
+                {paymentMethod === 'cod' ? 'Place Order (COD)' : 'Pay with PhonePe'}
               </motion.button>
             </form>
           </div>
@@ -272,12 +276,40 @@ export default function CheckoutPage() {
             
             <div className="space-y-4 mb-6">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium text-gray-800">{item.name}</p>
-                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                <div key={item.id} className="flex items-center space-x-4">
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                  <p className="font-semibold">{item.price}</p>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-800 text-sm">{item.name}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                      >
+                        <Minus size={12} />
+                      </motion.button>
+                      <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                      >
+                        <Plus size={12} />
+                      </motion.button>
+                    </div>
+                  </div>
+                  <p className="font-semibold text-gray-800">
+                    ₹{typeof item.price === 'string' ? item.price.replace(/[$]/g, '') : item.price}
+                  </p>
                 </div>
               ))}
             </div>
@@ -285,19 +317,19 @@ export default function CheckoutPage() {
             <div className="space-y-2 border-t pt-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span>${subtotal.toLocaleString()}</span>
+                <span>₹{subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
-                <span>${shipping}</span>
+                <span>₹{shipping}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Tax</span>
-                <span>${tax.toFixed(2)}</span>
+                <span className="text-gray-600">Tax (18%)</span>
+                <span>₹{tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-xl font-bold border-t pt-2">
                 <span>Total</span>
-                <span className="text-gray-800">${total.toFixed(2)}</span>
+                <span className="text-gray-800">₹{total.toFixed(2)}</span>
               </div>
             </div>
           </div>

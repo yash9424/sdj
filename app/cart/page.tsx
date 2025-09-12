@@ -11,7 +11,7 @@ export default function CartPage() {
   const { items, updateQuantity, removeFromCart, getTotalPrice } = useCart()
 
   const subtotal = getTotalPrice()
-  const shipping = subtotal > 1000 ? 0 : 50
+  const shipping = 99
   const tax = subtotal * 0.18
   const total = subtotal + shipping + tax
 
@@ -160,7 +160,7 @@ export default function CartPage() {
             </div>
             
             <p className="text-center text-sm text-[#A89F91]/60 mt-4">
-              Free shipping on orders over $1,000
+              Shipping charge: ₹99 for all orders
             </p>
           </div>
         </div>
