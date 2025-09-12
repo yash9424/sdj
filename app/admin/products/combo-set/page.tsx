@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, Edit, Trash2, Eye, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import ConfirmModal from '../../components/ConfirmModal'
 
 interface Product {
   _id: string
@@ -33,6 +34,12 @@ export default function ComboSetPage() {
   const [selectAll, setSelectAll] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 10
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} })
 
   useEffect(() => {
     fetchComboSetProducts()
@@ -54,18 +61,23 @@ export default function ComboSetPage() {
   }
 
   const deleteProduct = async (productId: string) => {
-    if (confirm('Are you sure you want to delete this combo set?')) {
-      try {
-        const response = await fetch(`/api/admin/products/${productId}`, {
-          method: 'DELETE'
-        })
-        if (response.ok) {
-          setProducts(products.filter(product => product._id !== productId))
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Combo Set',
+      message: 'Are you sure you want to delete this combo set? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/products/${productId}`, {
+            method: 'DELETE'
+          })
+          if (response.ok) {
+            setProducts(products.filter(product => product._id !== productId))
+          }
+        } catch (error) {
+          console.error('Failed to delete product:', error)
         }
-      } catch (error) {
-        console.error('Failed to delete product:', error)
       }
-    }
+    })
   }
 
   const handleSelectAll = () => {
@@ -88,19 +100,24 @@ export default function ComboSetPage() {
   const deleteSelectedProducts = async () => {
     if (selectedProducts.length === 0) return
     
-    if (confirm(`Are you sure you want to delete ${selectedProducts.length} selected combo sets?`)) {
-      try {
-        const deletePromises = selectedProducts.map(productId => 
-          fetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
-        )
-        await Promise.all(deletePromises)
-        setProducts(products.filter(product => !selectedProducts.includes(product._id)))
-        setSelectedProducts([])
-        setSelectAll(false)
-      } catch (error) {
-        console.error('Failed to delete products:', error)
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Multiple Combo Sets',
+      message: `Are you sure you want to delete ${selectedProducts.length} selected combo sets? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const deletePromises = selectedProducts.map(productId => 
+            fetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
+          )
+          await Promise.all(deletePromises)
+          setProducts(products.filter(product => !selectedProducts.includes(product._id)))
+          setSelectedProducts([])
+          setSelectAll(false)
+        } catch (error) {
+          console.error('Failed to delete products:', error)
+        }
       }
-    }
+    })
   }
 
   const filteredProducts = products.filter(product => 
@@ -299,6 +316,16 @@ export default function ComboSetPage() {
           </div>
         </div>
       )}
+      
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText="Delete"
+        type="danger"
+      />
     </div>
   )
 }

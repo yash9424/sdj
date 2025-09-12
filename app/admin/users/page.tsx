@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Filter, MoreVertical, Edit, Trash2, Eye } from 'lucide-react'
+import ConfirmModal from '../components/ConfirmModal'
 
 interface User {
   _id: string
@@ -24,6 +25,12 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const usersPerPage = 10
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} })
 
   useEffect(() => {
     fetchUsers()
@@ -54,19 +61,24 @@ export default function UsersPage() {
   }
 
   const deleteUser = async (userId: string) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      try {
-        const response = await fetch(`/api/admin/users/${userId}`, {
-          method: 'DELETE'
-        })
-        if (response.ok) {
-          setUsers(users.filter(user => user._id !== userId))
-          setShowActions(null)
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete User',
+      message: 'Are you sure you want to delete this user? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/users/${userId}`, {
+            method: 'DELETE'
+          })
+          if (response.ok) {
+            setUsers(users.filter(user => user._id !== userId))
+            setShowActions(null)
+          }
+        } catch (error) {
+          console.error('Failed to delete user:', error)
         }
-      } catch (error) {
-        console.error('Failed to delete user:', error)
       }
-    }
+    })
   }
 
   const viewUser = (user: User) => {
@@ -95,19 +107,24 @@ export default function UsersPage() {
   const deleteSelectedUsers = async () => {
     if (selectedUsers.length === 0) return
     
-    if (confirm(`Are you sure you want to delete ${selectedUsers.length} selected users?`)) {
-      try {
-        const deletePromises = selectedUsers.map(userId => 
-          fetch(`/api/admin/users/${userId}`, { method: 'DELETE' })
-        )
-        await Promise.all(deletePromises)
-        setUsers(users.filter(user => !selectedUsers.includes(user._id)))
-        setSelectedUsers([])
-        setSelectAll(false)
-      } catch (error) {
-        console.error('Failed to delete users:', error)
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Multiple Users',
+      message: `Are you sure you want to delete ${selectedUsers.length} selected users? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const deletePromises = selectedUsers.map(userId => 
+            fetch(`/api/admin/users/${userId}`, { method: 'DELETE' })
+          )
+          await Promise.all(deletePromises)
+          setUsers(users.filter(user => !selectedUsers.includes(user._id)))
+          setSelectedUsers([])
+          setSelectAll(false)
+        } catch (error) {
+          console.error('Failed to delete users:', error)
+        }
       }
-    }
+    })
   }
 
   const toggleUserBlock = async (userId: string, isBlocked: boolean) => {
@@ -362,8 +379,16 @@ export default function UsersPage() {
           </div>
         </div>
       )}
-
-
+      
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText="Delete"
+        type="danger"
+      />
     </div>
   )
 }

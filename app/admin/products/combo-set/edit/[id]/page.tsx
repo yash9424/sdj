@@ -1,10 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function EditComboSetPage({ params }: { params: { id: string } }) {
+  const [notification, setNotification] = useState<{
+    show: boolean
+    type: 'success' | 'error'
+    message: string
+  }>({ show: false, type: 'success', message: '' })
+  
   const [formData, setFormData] = useState({
     // Main Product Info
     name: '',
@@ -198,14 +204,28 @@ export default function EditComboSetPage({ params }: { params: { id: string } })
       })
 
       if (response.ok) {
-        alert('Combo set updated successfully!')
-        window.location.href = '/admin/products/combo-set'
+        setNotification({
+          show: true,
+          type: 'success',
+          message: 'Combo set updated successfully!'
+        })
+        setTimeout(() => {
+          window.location.href = '/admin/products/combo-set'
+        }, 1500)
       } else {
-        alert('Failed to update combo set')
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Failed to update combo set'
+        })
       }
     } catch (error) {
       console.error('Error updating combo set:', error)
-      alert('Error updating combo set')
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Error updating combo set'
+      })
     } finally {
       setSaving(false)
     }
@@ -759,6 +779,30 @@ export default function EditComboSetPage({ params }: { params: { id: string } })
           </button>
         </div>
       </form>
+      
+      {/* Notification */}
+      {notification.show && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className={`flex items-center space-x-3 px-6 py-4 rounded-lg shadow-lg border-2 ${
+            notification.type === 'success' 
+              ? 'bg-green-50 border-green-200 text-green-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            {notification.type === 'success' ? (
+              <CheckCircle className="text-green-500" size={20} />
+            ) : (
+              <XCircle className="text-red-500" size={20} />
+            )}
+            <span className="font-medium">{notification.message}</span>
+            <button
+              onClick={() => setNotification({ ...notification, show: false })}
+              className="ml-2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

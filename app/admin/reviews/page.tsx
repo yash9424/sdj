@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Star, Trash2, MessageSquare, Edit, Check, X } from 'lucide-react'
+import ConfirmModal from '../components/ConfirmModal'
 
 interface Review {
   _id: string
@@ -20,6 +21,12 @@ export default function ReviewsPage() {
   const [editingReview, setEditingReview] = useState<string | null>(null)
   const [editData, setEditData] = useState({ rating: 5, comment: '' })
   const [ratingFilter, setRatingFilter] = useState<number | null>(null)
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} })
 
   useEffect(() => {
     fetchReviews()
@@ -40,36 +47,46 @@ export default function ReviewsPage() {
   }
 
   const deleteReview = async (reviewId: string) => {
-    if (confirm('Are you sure you want to delete this review?')) {
-      try {
-        const response = await fetch(`/api/admin/reviews/${reviewId}`, {
-          method: 'DELETE'
-        })
-        if (response.ok) {
-          setReviews(reviews.filter(review => review._id !== reviewId))
-          setSelectedReviews(selectedReviews.filter(id => id !== reviewId))
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Review',
+      message: 'Are you sure you want to delete this review? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+            method: 'DELETE'
+          })
+          if (response.ok) {
+            setReviews(reviews.filter(review => review._id !== reviewId))
+            setSelectedReviews(selectedReviews.filter(id => id !== reviewId))
+          }
+        } catch (error) {
+          console.error('Failed to delete review:', error)
         }
-      } catch (error) {
-        console.error('Failed to delete review:', error)
       }
-    }
+    })
   }
 
   const bulkDeleteReviews = async () => {
     if (selectedReviews.length === 0) return
-    if (confirm(`Are you sure you want to delete ${selectedReviews.length} selected reviews?`)) {
-      try {
-        await Promise.all(
-          selectedReviews.map(id => 
-            fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' })
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Multiple Reviews',
+      message: `Are you sure you want to delete ${selectedReviews.length} selected reviews? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          await Promise.all(
+            selectedReviews.map(id => 
+              fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' })
+            )
           )
-        )
-        setReviews(reviews.filter(review => !selectedReviews.includes(review._id)))
-        setSelectedReviews([])
-      } catch (error) {
-        console.error('Failed to delete reviews:', error)
+          setReviews(reviews.filter(review => !selectedReviews.includes(review._id)))
+          setSelectedReviews([])
+        } catch (error) {
+          console.error('Failed to delete reviews:', error)
+        }
       }
-    }
+    })
   }
 
   const updateReview = async (reviewId: string) => {
@@ -327,6 +344,16 @@ export default function ReviewsPage() {
           </div>
         </div>
       </div>
+      
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText="Delete"
+        type="danger"
+      />
     </div>
   )
 }
