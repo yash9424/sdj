@@ -39,11 +39,21 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen pt-16 sm:pt-20 bg-gradient-to-br from-yellow-50 via-amber-100 to-gray-200 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen pt-16 sm:pt-20 relative flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        {/* Blurry Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
+            filter: 'blur(8px)'
+          }}
+        />
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40" />
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-sm sm:max-w-md"
+          className="w-full max-w-sm sm:max-w-md relative z-10"
         >
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/20 text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -69,11 +79,21 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-20 bg-gradient-to-br from-yellow-50 via-amber-100 to-gray-200 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-16 sm:pt-20 relative flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      {/* Blurry Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url("https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
+          filter: 'blur(8px)'
+        }}
+      />
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/40" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm sm:max-w-md"
+        className="w-full max-w-sm sm:max-w-md relative z-10"
       >
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/20">
           <div className="text-center mb-6 sm:mb-8">
