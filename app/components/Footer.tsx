@@ -78,6 +78,9 @@ export default function Footer() {
               <Link href="/about" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
                 → About Us
               </Link>
+              <Link href="/contact" className="block text-gray-600 hover:text-gray-800 transition-colors hover:translate-x-1 duration-300">
+                → Contact Us
+              </Link>
             </div>
           </div>
 
