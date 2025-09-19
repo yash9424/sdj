@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     if (decoded.role === 'admin' && decoded.email === 'adminjwelery@gmail.com') {
       return NextResponse.json({
         admin: {
+          id: 'admin',
           email: decoded.email,
           role: 'admin',
           username: 'Admin'
