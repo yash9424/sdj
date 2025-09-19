@@ -35,9 +35,26 @@ export default function ContactPage() {
     if (!validateForm()) return
     
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        setIsSubmitted(true)
+        setFormData({ name: '', email: '', mobile: '', message: '' })
+      } else {
+        const data = await response.json()
+        setErrors({ submit: data.error || 'Failed to send message' })
+      }
+    } catch (error) {
+      setErrors({ submit: 'Network error. Please try again.' })
+    }
+    
     setIsLoading(false)
-    setIsSubmitted(true)
   }
 
   if (isSubmitted) {
@@ -158,6 +175,12 @@ export default function ContactPage() {
                   />
                   {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
                 </div>
+
+                {errors.submit && (
+                  <div className="text-red-500 text-sm text-center">
+                    {errors.submit}
+                  </div>
+                )}
 
                 <motion.button
                   type="submit"
