@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     }
 
     const client = await clientPromise
-    const db = client.db('jewelry')
+    const db = client.db('jewelry_store')
     
     const newMessage = {
       name,
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const client = await clientPromise
-    const db = client.db('jewelry')
+    const db = client.db('jewelry_store')
     const messages = await db.collection('messages').find({}).sort({ createdAt: -1 }).toArray()
     
     return NextResponse.json({ messages })

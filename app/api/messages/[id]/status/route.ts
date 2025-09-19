@@ -9,7 +9,7 @@ export async function PATCH(
   try {
     const { status } = await request.json()
     const client = await clientPromise
-    const db = client.db('jewelry')
+    const db = client.db('jewelry_store')
 
     const result = await db.collection('messages').updateOne(
       { _id: new ObjectId(params.id) },

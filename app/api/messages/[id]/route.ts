@@ -8,7 +8,7 @@ export async function DELETE(
 ) {
   try {
     const client = await clientPromise
-    const db = client.db('jewelry')
+    const db = client.db('jewelry_store')
     
     await db.collection('messages').deleteOne({ _id: new ObjectId(params.id) })
     
