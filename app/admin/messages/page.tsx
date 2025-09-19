@@ -262,29 +262,12 @@ export default function MessagesPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-800">Message Details</h2>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => toggleMessageStatus(selectedMessage._id, selectedMessage.status)}
-                  className="flex items-center space-x-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {selectedMessage.status === 'unread' ? (
-                    <>
-                      <Check size={16} />
-                      <span>Mark as Read</span>
-                    </>
-                  ) : (
-                    <>
-                      <MailOpen size={16} />
-                      <span>Mark as Unread</span>
-                    </>
-                  )}                </button>
-                <button 
-                  onClick={() => setShowViewModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
+              <button 
+                onClick={() => setShowViewModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
             </div>
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -310,6 +293,24 @@ export default function MessagesPage() {
                 <div className="mt-2 p-4 bg-gray-50 rounded-lg border">
                   <p className="text-gray-700 whitespace-pre-wrap">{selectedMessage.message}</p>
                 </div>
+              </div>
+              <div className="flex justify-center mt-6 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => toggleMessageStatus(selectedMessage._id, selectedMessage.status)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {selectedMessage.status === 'unread' ? (
+                    <>
+                      <Check size={16} />
+                      <span>Mark as Read</span>
+                    </>
+                  ) : (
+                    <>
+                      <MailOpen size={16} />
+                      <span>Mark as Unread</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
