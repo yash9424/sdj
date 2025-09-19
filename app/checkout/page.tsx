@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import Footer from '../components/Footer'
+import { Order, OrderItem, ShippingAddress } from '@/models/Order'
 
 export default function CheckoutPage() {
   const { items, getTotalPrice, updateQuantity } = useCart()
@@ -58,21 +59,31 @@ export default function CheckoutPage() {
     e.preventDefault()
     
     try {
-      const orderData = {
-        name: formData.name,
-        email: formData.email,
-        mobile: formData.mobile,
-        secondMobile: formData.secondMobile,
+      const orderItems: OrderItem[] = items.map(item => ({
+        productId: item.id.toString(),
+        name: item.name,
+        price: item.priceValue || parseFloat(item.price.replace(/[₹,]/g, '')),
+        quantity: item.quantity,
+        image: item.image,
+        category: item.category
+      }))
+
+      const shippingAddress: ShippingAddress = {
+        fullName: formData.name,
+        phone: formData.mobile,
         address: formData.address,
-        state: formData.state,
         city: formData.city,
-        pincode: formData.pincode,
-        items: items,
-        subtotal: subtotal,
-        shipping: shipping,
-        tax: tax,
-        total: total,
-        paymentMethod: paymentMethod
+        state: formData.state,
+        pincode: formData.pincode
+      }
+
+      const orderData: Omit<Order, '_id' | 'orderId' | 'createdAt' | 'updatedAt' | 'status' | 'paymentStatus'> = {
+        userId: user?.id,
+        customerEmail: formData.email,
+        items: orderItems,
+        shippingAddress,
+        totalAmount: total,
+        paymentMethod: paymentMethod as 'cod' | 'online'
       }
 
       const response = await fetch('/api/orders', {
@@ -89,7 +100,7 @@ export default function CheckoutPage() {
         setNotification({
           show: true,
           type: 'success',
-          message: `Order placed successfully! Order ID: ${result.orderId}`
+          message: `Order placed successfully! Order ID: ${result.orderNumber}`
         })
         // Clear cart after successful order
         setTimeout(() => {

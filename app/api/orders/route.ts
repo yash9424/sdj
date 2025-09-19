@@ -1,95 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
-import { connectDB } from '@/lib/mongodb'
-import Order from '@/models/Order'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+import clientPromise from '@/lib/mongodb'
+import { Order } from '@/models/Order'
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB()
-    
-    const token = cookies().get('token')?.value
-    let userId = null
-    
-    if (token) {
-      try {
-        const decoded = jwt.verify(token, JWT_SECRET) as any
-        userId = decoded.userId
-      } catch (error) {
-        // Continue without user ID if token is invalid
-      }
-    }
+    const client = await clientPromise
+    const db = client.db('jewelry_store')
+    const orders = db.collection('orders')
 
-    const orderData = await request.json()
+    const orderData: Omit<Order, '_id'> = await request.json()
     
     // Generate order ID
-    const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase()
+    const orderId = `ORD${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`
     
-    const order = new Order({
+    const newOrder = {
+      ...orderData,
       orderId,
-      userId,
-      customerInfo: {
-        name: orderData.name,
-        email: orderData.email,
-        mobile: orderData.mobile,
-        secondMobile: orderData.secondMobile || null
-      },
-      shippingAddress: {
-        address: orderData.address,
-        state: orderData.state,
-        city: orderData.city,
-        pincode: orderData.pincode
-      },
-      items: orderData.items,
-      pricing: {
-        subtotal: orderData.subtotal,
-        shipping: orderData.shipping,
-        tax: orderData.tax,
-        total: orderData.total
-      },
-      paymentMethod: orderData.paymentMethod,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       status: 'pending',
-      createdAt: new Date()
-    })
+      paymentStatus: 'pending'
+    }
 
-    await order.save()
-
+    const result = await orders.insertOne(newOrder)
+    
     return NextResponse.json({ 
       success: true, 
-      orderId: order.orderId,
-      message: 'Order placed successfully' 
+      orderId: result.insertedId,
+      orderNumber: orderId 
     })
 
   } catch (error) {
     console.error('Order creation error:', error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to create order' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    await connectDB()
+    const client = await clientPromise
+    const db = client.db('jewelry_store')
+    const orders = db.collection('orders')
+
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+
+    const query = userId ? { userId } : {}
+    const allOrders = await orders.find(query).sort({ createdAt: -1 }).toArray()
     
-    const token = cookies().get('token')?.value
-    if (!token) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
-    }
+    const formattedOrders = allOrders.map(order => ({
+      ...order,
+      _id: order._id.toString()
+    }))
 
-    const decoded = jwt.verify(token, JWT_SECRET) as any
-    const orders = await Order.find({ userId: decoded.userId }).sort({ createdAt: -1 })
-
-    return NextResponse.json({ success: true, orders })
+    return NextResponse.json({ orders: formattedOrders })
 
   } catch (error) {
-    console.error('Get orders error:', error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch orders' },
-      { status: 500 }
-    )
+    console.error('Orders fetch error:', error)
+    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 })
   }
 }
