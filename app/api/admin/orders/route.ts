@@ -53,3 +53,27 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const client = await clientPromise
+    const db = client.db('jewelry_store')
+    const orders = db.collection('orders')
+
+    const { orderId } = await request.json()
+
+    const result = await orders.deleteOne(
+      { _id: new ObjectId(orderId) }
+    )
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true })
+
+  } catch (error) {
+    console.error('Order delete error:', error)
+    return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
+  }
+}

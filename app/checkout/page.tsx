@@ -5,14 +5,16 @@ import { CreditCard, Lock, ArrowLeft, Smartphone, Wallet, Plus, Minus, Truck } f
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import Footer from '../components/Footer'
 import { Order, OrderItem, ShippingAddress } from '@/models/Order'
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice, updateQuantity } = useCart()
-  const { user } = useAuth()
+  const { items, getTotalPrice, updateQuantity, clearCart } = useCart()
+  const { user, isLoggedIn } = useAuth()
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,8 +30,12 @@ export default function CheckoutPage() {
     cardName: ''
   })
 
-  // Auto-fetch user profile data
+  // Check login and auto-fetch user profile data
   useEffect(() => {
+    if (!isLoggedIn) {
+      router.push('/login')
+      return
+    }
     if (user) {
       setFormData(prev => ({
         ...prev,
@@ -38,7 +44,7 @@ export default function CheckoutPage() {
         mobile: user.mobile || ''
       }))
     }
-  }, [user])
+  }, [user, isLoggedIn, router])
   const [paymentMethod, setPaymentMethod] = useState('cod')
   const [notification, setNotification] = useState<{
     show: boolean
@@ -102,9 +108,9 @@ export default function CheckoutPage() {
           type: 'success',
           message: `Order placed successfully! Order ID: ${result.orderNumber}`
         })
-        // Clear cart after successful order
+        // Clear cart and redirect to confirmation
         setTimeout(() => {
-          window.location.href = '/jewelry'
+          window.location.href = `/order-confirmation?orderId=${result.orderId}`
         }, 2000)
       } else {
         setNotification({

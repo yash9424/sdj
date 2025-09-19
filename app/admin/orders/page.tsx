@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, ChevronDown, Eye, Package, Calendar, User, Mail, Phone, MapPin, CreditCard, Truck, X } from 'lucide-react'
+import { Search, ChevronDown, Eye, Package, Calendar, User, Mail, Phone, MapPin, CreditCard, Truck, X, Trash2 } from 'lucide-react'
 import AdminHeader from '../components/AdminHeader'
 import AdminSidebar from '../components/AdminSidebar'
 import { Order } from '@/models/Order'
@@ -12,6 +12,8 @@ export default function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showOrderModal, setShowOrderModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     fetchOrders()
@@ -64,6 +66,24 @@ export default function AdminOrdersPage() {
       }
     } catch (error) {
       console.error('Failed to update payment status:', error)
+    }
+  }
+
+  const deleteOrder = async (orderId: string) => {
+    try {
+      const response = await fetch('/api/admin/orders', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+
+      if (response.ok) {
+        setOrders(orders.filter(order => order._id !== orderId))
+        setShowDeleteModal(false)
+        setOrderToDelete(null)
+      }
+    } catch (error) {
+      console.error('Failed to delete order:', error)
     }
   }
 
@@ -138,83 +158,97 @@ export default function AdminOrdersPage() {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">ORDER ID</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">CUSTOMER</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">ITEMS</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">TOTAL</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">PAYMENT</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOrders.map((order, index) => (
-                    <tr key={order._id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-blue-600">{order.orderId || 'N/A'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{order.shippingAddress?.fullName || 'N/A'}</div>
-                        <div className="text-sm text-gray-500">{order.customerEmail || 'N/A'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {(order.items?.length || 0)} Item{(order.items?.length || 0) !== 1 ? 's' : ''}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">₹{(order.totalAmount || 0).toLocaleString()}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="relative">
-                          <select
-                            value={order.status || 'pending'}
-                            onChange={(e) => updateOrderStatus(order._id!, e.target.value)}
-                            className={`appearance-none px-3 py-1 rounded-full text-sm font-medium border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(order.status || 'pending')}`}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-current pointer-events-none" size={16} />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="relative">
-                          <select
-                            value={order.paymentStatus || 'pending'}
-                            onChange={(e) => updatePaymentStatus(order._id!, e.target.value)}
-                            className={`appearance-none px-3 py-1 rounded-full text-sm font-medium border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${getPaymentStatusColor(order.paymentStatus || 'pending')}`}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="paid">Paid</option>
-                            <option value="failed">Failed</option>
-                          </select>
-                          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-current pointer-events-none" size={16} />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => {
-                            setSelectedOrder(order)
-                            setShowOrderModal(true)
-                          }}
-                          className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                        >
-                          <Eye size={14} className="mr-1" />
-                          View
-                        </button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px]">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">ORDER ID</th>
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[180px]">CUSTOMER</th>
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">ITEMS</th>
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">TOTAL</th>
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">STATUS</th>
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">PAYMENT</th>
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">ACTIONS</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredOrders.map((order, index) => (
+                      <tr key={order._id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="text-xs sm:text-sm font-medium text-blue-600">{order.orderId || 'N/A'}</div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900">{order.shippingAddress?.fullName || 'N/A'}</div>
+                          <div className="text-xs text-gray-500 truncate max-w-[150px]">{order.customerEmail || 'N/A'}</div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="text-xs sm:text-sm text-gray-900">
+                            {(order.items?.length || 0)} Item{(order.items?.length || 0) !== 1 ? 's' : ''}
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="text-xs sm:text-sm font-semibold text-gray-900">₹{(order.totalAmount || 0).toLocaleString()}</div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="relative">
+                            <select
+                              value={order.status || 'pending'}
+                              onChange={(e) => updateOrderStatus(order._id!, e.target.value)}
+                              className={`appearance-none px-2 py-1 rounded-full text-xs font-medium border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(order.status || 'pending')}`}
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="confirmed">Confirmed</option>
+                              <option value="processing">Processing</option>
+                              <option value="shipped">Shipped</option>
+                              <option value="delivered">Delivered</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                            <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 text-current pointer-events-none" size={12} />
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="relative">
+                            <select
+                              value={order.paymentStatus || 'pending'}
+                              onChange={(e) => updatePaymentStatus(order._id!, e.target.value)}
+                              className={`appearance-none px-2 py-1 rounded-full text-xs font-medium border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${getPaymentStatusColor(order.paymentStatus || 'pending')}`}
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="paid">Paid</option>
+                              <option value="failed">Failed</option>
+                            </select>
+                            <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 text-current pointer-events-none" size={12} />
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(order)
+                                setShowOrderModal(true)
+                              }}
+                              className="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                            >
+                              <Eye size={12} className="mr-1" />
+                              View
+                            </button>
+                            <button
+                              onClick={() => {
+                                setOrderToDelete(order._id!)
+                                setShowDeleteModal(true)
+                              }}
+                              className="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded-md text-red-600 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                            >
+                              <Trash2 size={12} className="mr-1" />
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               {filteredOrders.length === 0 && (
                 <div className="text-center py-12">
@@ -330,6 +364,44 @@ export default function AdminOrdersPage() {
                   </>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && orderToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium text-gray-900">Delete Order</h3>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-sm text-gray-500">
+                Are you sure you want to delete this order? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setOrderToDelete(null)
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteOrder(orderToDelete)}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
